@@ -1,0 +1,49 @@
+{
+	"vertices": [
+        1550,
+        1550
+	],
+	"reduction_factor": [
+		null
+	],
+	"max_levels": [
+		null
+	],
+	"max_size": [
+        15,
+        15
+	],
+	"matching": "multi-label",
+    "seed_priority": "random",
+	"threshold": 0.3,
+	"max_prop_label": 7,
+	"until_convergence": false,
+	"upper_bound": null,
+	"itr": 10,
+	"reverse": true,
+	"output_directory": "output",
+	"output": "bipartite-1",
+	"input": "input/bipartite-1.ncol",
+	"type_filename": null,
+	"file_labels_true": "input/bipartite-1.membership",
+	"save_conf": true,
+	"save_ncol": false,
+	"save_type": false,
+    "save_membership": true,
+	"save_predecessor": false,
+	"save_successor": false,
+	"save_weight": false,
+	"save_source": false,
+	"save_timing_csv": true,
+	"save_timing_json": false,
+	"unique_key": false,
+	"show_timing": true,
+	"show_conf": false,
+	"metrics": ["nmi", "ars", "modularity"],
+	"schema": [
+		[0,1]
+	],
+	"save_metrics_csv": true,
+	"save_metrics_json": true,
+	"show_metrics": true
+}
