@@ -1,6 +1,29 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+"""
+MFKN: Multilevel framework for kpartite networks
+
+::Multi-label propagation
+
+Copyright (C) 2020 Alan Valejo <alanvalejo@gmail.com> All rights reserved
+
+This program comes with ABSOLUTELY NO WARRANTY. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS
+WITH YOU.
+
+Owner or contributors are not liable for any direct, indirect, incidental, special, exemplary, or consequential
+damages, (such as loss of data or profits, and others) arising in any way out of the use of this software,
+even if advised of the possibility of such damage.
+
+This program is free software and distributed in the hope that it will be useful: you can redistribute it and/or
+modify it under the terms of the GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version. See the GNU General Public License for more
+details. You should have received a copy of the GNU General Public License along with this program. If not,
+see http://www.gnu.org/licenses/.
+
+Giving credit to the author by citing the papers.
+"""
+
 import random
 import math
 import sys
@@ -14,7 +37,17 @@ from heapq import nlargest
 import functools
 import operator
 
-class MultiLevelClassificationK(MGraph):
+__maintainer__ = 'Alan Valejo'
+__email__ = 'alanvalejo@gmail.com'
+__author__ = 'Alan Valejo'
+__credits__ = ['Alan Valejo']
+__homepage__ = 'https://www.alanvalejo.com.br'
+__license__ = 'GNU.GPL.v3'
+__docformat__ = 'markdown en'
+__version__ = '0.1'
+__date__ = '2020-05-05'
+
+class MultiLabelPropagation(MGraph):
 
     def __init__(self, *args, **kwargs):
         super().__init__()
@@ -22,8 +55,7 @@ class MultiLevelClassificationK(MGraph):
         prop_defaults = {
             'seed_priority': 'random', 'max_comm_size': None, 'upper_bound': None,
             'reverse': None, 'threshold': 0.3, 'max_prop_label': 7,
-            'itr': 10, 'max_size': 100, 'until_convergence': False,
-            'target_partition': 0
+            'itr': 10, 'max_size': 100, 'until_convergence': False
         }
 
         self.__dict__.update(prop_defaults)
@@ -32,47 +64,6 @@ class MultiLevelClassificationK(MGraph):
         self.w_comms = []
         self.n_comms = []
         self.itr_convergence = 0
-        self.schema_neighborhood = {}
-        self.guides = {}
-        self.coarsening_order = []
-
-        self.neighborhood_from_guide = []
-        self.neighbors_from_guide = {}
-
-    def calculate_guides(self):
-        schema_neighborhood = {}
-        for layer in range(self['layers']):
-            schema_neighborhood[layer] = []
-        for edge in self.schema:
-            schema_neighborhood[edge[0]].append(edge[1])
-            schema_neighborhood[edge[1]].append(edge[0])
-
-        for layer in range(self['layers']):
-            schema_neighborhood[layer] = set(schema_neighborhood[layer])
-
-        bfsList = [self.target_partition]
-        added = [self.target_partition]
-
-        while len(bfsList) != 0:
-            partition = bfsList.pop(0)
-            for s in schema_neighborhood[partition]:
-                if s not in added:
-                    added.append(s)
-                    bfsList.append(s)
-                    self.guides[s] = partition
-
-        self.coarsening_order = added
-
-    def calculate_neighborhood_from_guide(self):
-        for layer in range(self['layers']):
-            if layer == self.target_partition:
-                guide_vertices = []
-            else:
-                guide_vertices = self['vertices_by_type'][self.guides[layer]]
-            for v in self['vertices_by_type'][layer]:
-                neighbors = list(filter(lambda u: u in guide_vertices, self.neighbors(v)))
-                self.neighbors_from_guide[v] = neighbors
-                self.neighborhood_from_guide.append([v] + neighbors)
 
     def contract(self, matching):
         """
@@ -113,7 +104,7 @@ class MultiLevelClassificationK(MGraph):
             reverse=self.reverse, seed_priority=self.seed_priority,
             max_prop_label=self.max_prop_label, until_convergence=self.until_convergence
         )
-        coarse = MultiLevelClassificationK(**kwargs)
+        coarse = MultiLabelPropagation(**kwargs)
         coarse.add_vertices(uniqid)
         coarse.vs['type'] = types
         coarse.vs['weight'] = weights
@@ -152,10 +143,8 @@ class MultiLevelClassificationK(MGraph):
         return coarse
 
     def load(self, filename, filetype='ncol', vertices=None, type_filename=None):
-        super(MultiLevelClassificationK, self).load(filename, filetype=filetype, vertices=vertices, type_filename=type_filename)
+        super(MultiLabelPropagation, self).load(filename, filetype=filetype, vertices=vertices, type_filename=type_filename)
         self.validate()
-        self.calculate_guides()
-        self.calculate_neighborhood_from_guide()
 
     def validate(self):
 
@@ -203,7 +192,7 @@ class MultiLevelClassificationK(MGraph):
     def _frequency(self, u):
         label_freq = Counter()
         sum_freq = 0.0
-        for n in self.neighbors_from_guide[u]:
+        for n in self.neighbors(u):
             for t in self.vs[n]['label']:
                 label_freq.update({t[0]: t[1]})
                 sum_freq += t[1]
@@ -211,7 +200,7 @@ class MultiLevelClassificationK(MGraph):
 
     def _propagation(self, layer):
         receivers = self['vertices_by_type'][layer]
-        propagators = list(filter(lambda neighborhood: neighborhood[0] in receivers, self.neighborhood_from_guide))
+        propagators = self.neighborhood(receivers)[1:]
         propagators = list(set(functools.reduce(operator.iconcat, propagators, [])))
         convergence = True
         self._score(propagators)
@@ -271,9 +260,8 @@ class MultiLevelClassificationK(MGraph):
 
         for itr in range(self.itr):
             convergence = False
-            for layer in self.coarsening_order:
-                if layer is not self.target_partition:
-                    convergence = self._propagation(layer)
+            for layer in range(self['layers']):
+                convergence = self._propagation(layer)
 
             if convergence:
                 break
@@ -282,5 +270,3 @@ class MultiLevelClassificationK(MGraph):
 
         for v in self.vs():
             v['label'] = max(v['label'], key=itemgetter(1))[0]
-
-        print("ok")
