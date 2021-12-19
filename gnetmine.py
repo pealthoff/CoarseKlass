@@ -54,7 +54,7 @@ def S(filenames, m, t=[0]):
     for i in matrices[1:]:
         R *= i
 
-    # generate diagnol matrix
+    # generate diagonal matrix
     D1 = np.diag(np.array(np.power(R.sum(axis=1), -0.5)).flatten())
     D2 = np.diag(np.array(np.power(R.sum(axis=0), -0.5)).flatten())
 
@@ -128,8 +128,7 @@ def main():
     get_accuracy(r, test_label)
     end = time.time()
 
-    print
-    "Time:\ngenerate S:", mid - start, "\tGNetMine:", end - mid
+    print("Time:\ngenerate S:", mid - start, "\tGNetMine:", end - mid)
 
 
 if __name__ == "__main__":
