@@ -1,0 +1,55 @@
+{
+    "vertices": [
+        14475,
+        14376,
+        20,
+        8920
+    ],
+    "reduction_factor": [
+        0.7
+    ],
+    "max_levels": [
+        3
+    ],
+    "max_size": [
+        15,
+        15,
+        15,
+        15
+    ],
+    "matching": "multi-label",
+    "seed_priority": "random",
+    "threshold": 0.3,
+    "max_prop_label": 7,
+    "upper_bound": null,
+    "itr": 10,
+    "reverse": true,
+    "output_directory": "output",
+    "output": "APCT",
+    "input": "input/APCT.ncol",
+    "type_filename": "input/APCT.type",
+    "file_labels_true": "input/APCT.membership",
+    "save_conf": true,
+    "save_ncol": true,
+    "save_type": true,
+    "save_membership": true,
+    "save_predecessor": false,
+    "save_successor": false,
+    "save_weight": true,
+    "save_source": false,
+    "save_timing_csv": true,
+    "save_timing_json": false,
+    "unique_key": false,
+    "show_timing": true,
+    "show_conf": false,
+    "metrics": ["nmi", "ars", "modularity"],
+    "schema": [
+        [0,1],
+        [1,2],
+        [2,3],
+        [3,1]
+    ],
+    "save_metrics_csv": true,
+    "save_metrics_json": true,
+    "show_metrics": true
+}
