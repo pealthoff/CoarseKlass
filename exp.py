@@ -43,7 +43,7 @@ def main():
 
         # Setup parse options command line
         current_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-        parser = args.setup_parser(current_path + '/args/mcdkn.json')
+        parser = args.setup_parser(current_path + '/args/mlck.json')
         options = parser.parse_args()
         args.update_json(options)
         args.check_output(options)
