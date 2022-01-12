@@ -13,19 +13,19 @@ import time
 # S: PA, AP, PC, CP, PT, TP, AC, CA
 # ij: A, P, C, T;
 def GNetMine(S, num_vertices_por_particao, label, options, t=100, a=0.1, l=0.2):
-    # label the items
     k = len(num_vertices_por_particao)
-    y = {n: [np.zeros((num_vertices_por_particao[n], 1)) for _ in range(k)] for n in num_vertices_por_particao}
+    # label the items
+    y = {str(n): [np.zeros((num_vertices_por_particao[n], 1)) for _ in range(k)] for n in range(k)}
     for x in label:
         for i in label[x]:
             y[x][label[x][i] - 1][i - 1, 0] = 1
 
-    others = {i: [i + j for j in num_vertices_por_particao if j != i and i + j in S] for i in num_vertices_por_particao}
+    others = {str(i): [str(i) + str(j) for j in range(k) if j != i and str(i) + str(j) in S] for i in range(k)}
 
     # iterate until converge
     old_f = y
     for _ in range(t):
-        new_f = {n: [np.zeros((num_vertices_por_particao[n], 1)) for _ in range(k)] for n in num_vertices_por_particao}
+        new_f = {str(n): [np.zeros((num_vertices_por_particao[n], 1)) for _ in range(k)] for n in range(k)}
         for fi in old_f:
             for j, fk in enumerate(old_f[fi]):
                 sf = sum([S[i] * old_f[i[1]][j] for i in others[fi]])
@@ -36,7 +36,7 @@ def GNetMine(S, num_vertices_por_particao, label, options, t=100, a=0.1, l=0.2):
 
     # decide the labels
     f = {i: [j.tolist() for j in old_f[i]] for i in old_f}
-    out = {n: np.zeros(num_vertices_por_particao[n]) for n in num_vertices_por_particao}
+    out = {str(n): np.zeros(num_vertices_por_particao[n]) for n in range(k)}
     for fi in f:
         for i in range(len(f[fi][0])):
             out[fi][i] = np.argmax([f[fi][j][i] for j in range(k)]) + 1
@@ -45,20 +45,17 @@ def GNetMine(S, num_vertices_por_particao, label, options, t=100, a=0.1, l=0.2):
     return out
 
 
-# calculate S using files
-def S(filenames, m, t=[0]):
-    matrices = []
-    for i, filename in enumerate(filenames):
-        matrix = np.zeros((m[i], m[i + 1]), dtype=int)
-        with open(filename, "r") as f:
-            for line in f:
-                entry = [int(j) for j in line.split()]
-                matrix[entry[0 + t[i]] - 1][entry[1 - t[i]] - 1] = entry[2]
-        matrices.append(sp.csc_matrix(matrix))
-
-    R = matrices[0]
-    for i in matrices[1:]:
-        R *= i
+def S(particoes, types, options):
+    offset = [sum(options.vertices[0: particoes[i]]) for i in range(len(particoes))]
+    matrix = np.zeros((options.vertices[particoes[0]], options.vertices[particoes[1]]), dtype=int)
+    with open(options.input, "r") as f:
+        for line in f:
+            entry = [int(j) for j in line.split()]
+            if types[entry[0]] > particoes[0]:
+                break
+            if types[entry[0]] == particoes[0] and types[entry[1]] == particoes[1]:
+                matrix[entry[0] - offset[0] - 1][entry[1] - offset[1] - 1] = entry[2]
+    R = sp.csc_matrix(matrix)
 
     # generate diagnol matrix
     D1 = np.diag(np.array(np.power(R.sum(axis=1), -0.5)).flatten())
@@ -114,9 +111,9 @@ def get_accuracy(result, label):
             else:
                 out[i].append(0.0)
     print(
-    "\nAccuracy:\n", "author:", sum(out["0"]) / len(out["0"]), \
-    "\tpaper:", sum(out["1"]) / len(out["1"]), \
-    "\tconf:", sum(out["2"]) / len(out["2"]), "\n")
+        "\nAccuracy:\n", "author:", sum(out["0"]) / len(out["0"]), \
+        "\tpaper:", sum(out["1"]) / len(out["1"]), \
+        "\tconf:", sum(out["2"]) / len(out["2"]), "\n")
 
 
 def main():
@@ -131,18 +128,26 @@ def main():
         args.check_output(options)
 
     with timing.timeit_context_add('Load graph'):
-        num_vertices = options.vertices
-        
+        num_vertices_por_particao = options.vertices
+
         start = time.time()
-        PA, AP = S(["./data/PA.txt"], [num_vertices[1], num_vertices[0]])
-        PC, CP = S(["./data/PC.txt"], [num_vertices[1], num_vertices[2]])
-        PT, TP = S(["./data/PT.txt"], [num_vertices[1], num_vertices[3]])
-        AC, CA = S(["./data/PA.txt", "./data/PC.txt"], [num_vertices[0], num_vertices[1], num_vertices[2]], [1, 0])
+
+        types = {}
+
+        with open(options.type_filename, "r") as f:
+            i = 1
+            for line in f:
+                types[i] = int(line)
+                i = i + 1
+
+        PA, AP = S([1, 0], types, options)
+        PC, CP = S([1, 2], types, options)
+        PT, TP = S([1, 3], types, options)
         mid = time.time()
 
     train_label, test_label = get_label()
     r = GNetMine({"10": PA, "01": AP, "12": PC, "21": CP, "13": PT, "31": TP, \
-                  "02": AC, "20": CA}, {"0": num_vertices[0], "1": num_vertices[1], "2": num_vertices[2], "3": num_vertices[3]}, train_label, options, 10)
+                  }, num_vertices_por_particao, train_label, options, 100)
     get_accuracy(r, test_label)
     end = time.time()
 
