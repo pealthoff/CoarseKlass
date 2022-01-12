@@ -140,14 +140,14 @@ def main():
                 types[i] = int(line)
                 i = i + 1
 
-        PA, AP = S([1, 0], types, options)
-        PC, CP = S([1, 2], types, options)
-        PT, TP = S([1, 3], types, options)
+        connections = {}
+        for pair in options.schema:
+            connections[str(pair[0])+str(pair[1])], connections[str(pair[1])+str(pair[0])] = S([pair[0], pair[1]], types, options)
+
         mid = time.time()
 
     train_label, test_label = get_label()
-    r = GNetMine({"10": PA, "01": AP, "12": PC, "21": CP, "13": PT, "31": TP, \
-                  }, num_vertices_por_particao, train_label, options, 100)
+    r = GNetMine(connections, num_vertices_por_particao, train_label, options, 100)
     get_accuracy(r, test_label)
     end = time.time()
 
