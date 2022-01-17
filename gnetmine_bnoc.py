@@ -1,5 +1,6 @@
 import inspect
 import os
+from random import randint
 
 import numpy as np
 
@@ -11,14 +12,17 @@ import time
 
 # the main algorithm;
 # S: PA, AP, PC, CP, PT, TP, AC, CA
-# ij: A, P, C, T;
-def GNetMine(S, num_vertices_por_particao, label, options, t=100, a=0.1, l=0.2):
+# particao APCT: '0', '1', '2', '3';
+def GNetMine(S, num_vertices_por_particao, options, t=100, a=0.1, l=0.2, labels={}):
     k = len(num_vertices_por_particao)
+
+    offset = [sum(num_vertices_por_particao[0: i]) for i in range(k)]
     # label the items
     y = {str(n): [np.zeros((num_vertices_por_particao[n], 1)) for _ in range(k)] for n in range(k)}
-    for x in label:
-        for i in label[x]:
-            y[x][label[x][i] - 1][i - 1, 0] = 1
+    for particao in labels:
+        for i in labels[particao]:
+            y[particao][labels[particao][i] - 1][i - offset[int(particao)] - 1, 0] = 1
+            # y[particao][label[particao][i] - 1][i - 1, 0] = 1
 
     others = {str(i): [str(i) + str(j) for j in range(k) if j != i and str(i) + str(j) in S] for i in range(k)}
 
@@ -26,23 +30,23 @@ def GNetMine(S, num_vertices_por_particao, label, options, t=100, a=0.1, l=0.2):
     old_f = y
     for _ in range(t):
         new_f = {str(n): [np.zeros((num_vertices_por_particao[n], 1)) for _ in range(k)] for n in range(k)}
-        for fi in old_f:
-            for j, fk in enumerate(old_f[fi]):
-                sf = sum([S[i] * old_f[i[1]][j] for i in others[fi]])
-                new_f[fi][j] = (l * sf + 2 * l * fk + a * y[fi][j]) \
-                               / (len(others[fi]) * l + 2 * l + a)
+        for particao in old_f:
+            for j, fk in enumerate(old_f[particao]):
+                sf = sum([S[i] * old_f[i[1]][j] for i in others[particao]])
+                new_f[particao][j] = (l * sf + 2 * l * fk + a * y[particao][j]) \
+                                     / (len(others[particao]) * l + 2 * l + a)
         old_f = new_f
         # print new_f
 
     # decide the labels
     f = {i: [j.tolist() for j in old_f[i]] for i in old_f}
     out = {str(n): np.zeros(num_vertices_por_particao[n]) for n in range(k)}
-    for fi in f:
-        for i in range(len(f[fi][0])):
-            out[fi][i] = np.argmax([f[fi][j][i] for j in range(k)]) + 1
+    for particao in f:
+        for i in range(len(f[particao][0])):
+            out[particao][i] = np.argmax([f[particao][j][i] for j in range(k)]) + 1
 
     # print [out[i].tolist() for i in out]
-    return out
+    return out, f
 
 
 def S(particoes, types, options):
@@ -65,55 +69,25 @@ def S(particoes, types, options):
     return out, sp.csc_matrix.transpose(out)
 
 
-# get existing labels
-def get_label():
-    author, paper = {}, {}
-    with open("./data/author_label.txt", "r") as f1:
-        for line in f1:
-            a, l = [int(i) for i in line.split()]
-            author[a] = l
-    with open("./data/paper_label.txt", "r") as f2:
-        for line in f2:
-            p, l = [int(i) for i in line.split()]
-            paper[p] = l
-
-    def get_num(filename):
-        out = []
-        with open(filename, "r") as f:
-            for line in f:
-                out.append(int(line))
-        return out
-
-    train_author = get_num("./data/trainId_author.txt")
-    train_paper = get_num("./data/trainId_paper.txt")
-    test_author = get_num("./data/testId_author.txt")
-    test_paper = get_num("./data/testId_paper.txt")
-
-    return {"0": {a: author[a] for a in train_author}, \
-            "1": {p: paper[p] for p in train_paper}}, \
-           {"0": {a: author[a] for a in test_author}, \
-            "1": {p: paper[p] for p in test_paper}}
-
-
 # generate results
-def get_accuracy(result, label):
-    label["2"] = {}
-    with open("./data/conf_label.txt", "r") as f:
-        for line in f:
-            l = [int(i) for i in line.split()]
-            label["2"][l[0]] = l[1]
+def get_accuracy(result, label, num_vertices_por_particao):
+    k = len(num_vertices_por_particao)
+    offset = [sum(num_vertices_por_particao[0: i]) for i in range(k)]
 
-    out = {"0": [], "1": [], "2": []}
+    out = {str(i): [] for i in range(k)}
+
     for i in label:
         for j in label[i]:
-            if result[i][j - 1] == label[i][j]:
+            if result[i][j - offset[int(i)] - 1] == label[i][j]:
                 out[i].append(1.0)
             else:
                 out[i].append(0.0)
-    print(
-        "\nAccuracy:\n", "author:", sum(out["0"]) / len(out["0"]), \
-        "\tpaper:", sum(out["1"]) / len(out["1"]), \
-        "\tconf:", sum(out["2"]) / len(out["2"]), "\n")
+
+    accuracy = {str(i): 0 for i in range(k)}
+    for particao in label:
+        if len(out[particao]) != 0:
+            accuracy[particao] = sum(out[particao]) / len(out[particao])
+    return accuracy
 
 
 def main():
@@ -142,15 +116,84 @@ def main():
 
         connections = {}
         for pair in options.schema:
-            connections[str(pair[0])+str(pair[1])], connections[str(pair[1])+str(pair[0])] = S([pair[0], pair[1]], types, options)
+            connections[str(pair[0]) + str(pair[1])], connections[str(pair[1]) + str(pair[0])] = S([pair[0], pair[1]],
+                                                                                                   types, options)
 
         mid = time.time()
 
-    train_label, test_label = get_label()
-    r = GNetMine(connections, num_vertices_por_particao, train_label, options, 100)
-    get_accuracy(r, test_label)
-    end = time.time()
+    labels = {}
+    with open(options.file_labels_true, "r") as f:
+        for id, line in enumerate(f, start=1):
+            label = line.split()[0]
+            if label != 'None':
+                labels[id] = int(label)
 
+    k = len(num_vertices_por_particao)
+
+    def get_all_labels_por_particao():
+        labels_por_particao = {str(i): {} for i in range(k)}
+        for id in labels:
+            labels_por_particao[str(types[id])][id] = labels[id]
+        return labels_por_particao
+
+
+    def split_test_train_accuracy():
+        def split_test_train_sets():
+            train = {str(i): {} for i in range(k)}
+            test = {str(i): {} for i in range(k)}
+            for id in labels:
+                r = randint(1, 10)
+                if r == 1:
+                    train[str(types[id])][id] = labels[id]
+                else:
+                    test[str(types[id])][id] = labels[id]
+            return train, test
+
+        labels_por_particao_train, labels_por_particao_test = split_test_train_sets()
+        y, multilabel_y = GNetMine(connections, num_vertices_por_particao, options, 100, labels=labels_por_particao_train)
+        return get_accuracy(y, labels_por_particao_test, num_vertices_por_particao)
+
+    def cross_validation_accuracy(cv=10):
+        def split_cross_validation_sets(cv=10):
+            groups = [{str(i): {} for i in range(k)} for j in range(cv)]
+            test = {str(i): {} for i in range(k)}
+            for id in labels:
+                r = randint(0, cv - 1)
+                groups[r][str(types[id])][id] = labels[id]
+            return groups
+
+        groups = split_cross_validation_sets(cv)
+        groups_accuracy = []
+        for cross_group in range(cv):
+            labels_por_particao_train = groups[cross_group]
+            labels_por_particao_test = {str(i): {} for i in range(k)}
+            for other_group in range(cv):
+                if other_group != cross_group:
+                    for particao in labels_por_particao_test:
+                        labels_por_particao_test[particao].update(groups[other_group][particao])
+
+            y, multilabel_y = GNetMine(connections, num_vertices_por_particao, options, 100, labels=labels_por_particao_train)
+            groups_accuracy.append(get_accuracy(y, labels_por_particao_test, num_vertices_por_particao))
+
+        accuracy = {str(i): 0 for i in range(k)}
+        for group in range(cv):
+            for particao in accuracy:
+                accuracy[particao] = accuracy[particao] + groups_accuracy[group][particao]
+
+        for particao in accuracy:
+            accuracy[particao] = accuracy[particao]/cv
+
+        return accuracy
+
+    # accuracy = split_test_train_accuracy()
+    accuracy = cross_validation_accuracy()
+
+    print("\nAccuracy:\n")
+    for particao in accuracy:
+        if accuracy[particao] != 0:
+            print("partição", particao, ": ", accuracy[particao])
+
+    end = time.time()
     print("Time:\ngenerate S:", mid - start, "\tGNetMine:", end - mid)
 
 
