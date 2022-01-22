@@ -54,7 +54,8 @@ def S(particoes, types, options):
     matrix = np.zeros((options.vertices[particoes[0]], options.vertices[particoes[1]]), dtype=int)
     with open(options.input, "r") as f:
         for line in f:
-            entry = [int(j) for j in line.split()]
+            a, b, c = line.split()
+            entry = [int(a)+1, int(b)+1, float(c)]
             if types[entry[0]] > particoes[0]:
                 break
             if types[entry[0]] == particoes[0] and types[entry[1]] == particoes[1]:
