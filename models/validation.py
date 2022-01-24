@@ -178,22 +178,40 @@ class Validation:
         self.labels_true = labels_true
         self.labels_pred = labels_pred
         self.schema = schema
-        self.header = [''] + list(map(str, range(self.graph['layers']))) + ['Average']
+        # self.header = [''] + list(map(str, range(self.graph['layers']))) + ['Average']
+        self.header = ['', 'alvo']
         self.rows_name = []
         self.rows_value = []
 
         self.labels_pred_split = []
         self.labels_true_split = []
-        for layer in range(self.graph['layers']):
+        for layer in range(self.graph['layers'])[:1]:
             indices = graph.vs.select(type=layer).indices
-            self.labels_pred_split.append(labels_pred[indices])
-            if labels_true is not None:
-                self.labels_true_split.append(labels_true[indices])
+            indices_with_label_true = [i-1 for i in indices if labels_true[i-1]!=-1]
+            self.labels_pred_split.append(labels_pred[indices_with_label_true])
+            self.labels_true_split.append(labels_true[indices_with_label_true])
+
+    def compute_accuracy(self):
+        args = []
+        for layer in range(self.graph['layers'])[:1]:
+            args.append(metrics.accuracy_score(self.labels_true_split[layer], self.labels_pred_split[layer]))
+
+        average = sum(args) / len(args)
+        args.append(average)
+        for key, value in enumerate(args):
+            args[key] = self.format.format(args[key])
+
+        self.rows_name.append('accuracy')
+        self.rows_value.append(args)
+
 
     def compute_adjusted_rand_score(self):
         args = []
         for layer in range(self.graph['layers']):
-            args.append(metrics.cluster.adjusted_rand_score(self.labels_true_split[layer], self.labels_pred_split[layer]))
+            try:
+                args.append(metrics.cluster.adjusted_rand_score(self.labels_true_split[layer], self.labels_pred_split[layer]))
+            except ValueError:
+                pass
 
         average = sum(args) / len(args)
         args.append(average)

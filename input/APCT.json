@@ -6,7 +6,7 @@
         8920
     ],
     "reduction_factor": [
-        0.7
+        0.3
     ],
     "max_levels": [
         3
@@ -42,7 +42,7 @@
     "unique_key": false,
     "show_timing": true,
     "show_conf": false,
-    "metrics": ["nmi", "ars", "modularity"],
+    "metrics": ["nmi", "ars", "accuracy"],
     "schema": [
         [1,0],
         [1,2],
@@ -50,5 +50,6 @@
     ],
     "save_metrics_csv": true,
     "save_metrics_json": true,
-    "show_metrics": true
+    "show_metrics": true,
+    "particao_principal": true
 }

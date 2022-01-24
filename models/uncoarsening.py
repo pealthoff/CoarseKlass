@@ -51,3 +51,17 @@ class Uncoarsening:
         for vertex in self.hierarchy_graphs[-1].vs():
             for source in vertex['source']:
                 self.final_solution[source] = vertex.index
+
+    def naive_uncoarsening(self):
+        self.final_solution = list(range(self.hierarchy_graphs[0]['vertices'][0]))
+        for vertex in self.hierarchy_graphs[-1].vs.select(type=0):
+            for source in vertex['source']:
+                def desencapsular(propriedade):
+                    try:
+                        while True:
+                            propriedade = propriedade[0]
+                    except TypeError:
+                        return propriedade
+
+                name = desencapsular(vertex['name'])
+                self.final_solution[source] = self.initial_solution[name]

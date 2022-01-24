@@ -282,5 +282,3 @@ class MultiLevelClassificationK(MGraph):
 
         for v in self.vs():
             v['label'] = max(v['label'], key=itemgetter(1))[0]
-
-        print("ok")

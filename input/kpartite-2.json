@@ -6,23 +6,23 @@
         150
 	],
 	"reduction_factor": [
-		0.7
+		0.9
 	],
 	"max_levels": [
-		3
+		0, 100, 100, 100
 	],
 	"max_size": [
-        15,
+        150,
         15,
 		15,
 		15
 	],
 	"matching": "multi-label",
     "seed_priority": "random",
-	"threshold": 0.3,
-	"max_prop_label": 7,
+	"threshold": 0.4,
+	"max_prop_label": 4,
 	"upper_bound": null,
-	"itr": 10,
+	"itr": 100,
 	"reverse": true,
 	"output_directory": "output",
 	"output": "kpartite-2",
@@ -42,7 +42,7 @@
 	"unique_key": false,
 	"show_timing": true,
 	"show_conf": false,
-	"metrics": ["nmi", "ars", "modularity"],
+	"metrics": ["nmi", "ars", "accuracy"],
 	"schema": [
 		[0,1],
 		[1,2],
@@ -51,5 +51,6 @@
 	],
 	"save_metrics_csv": true,
 	"save_metrics_json": true,
-	"show_metrics": true
+	"show_metrics": true,
+	"particao_principal": true
 }

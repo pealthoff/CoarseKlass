@@ -4,7 +4,6 @@ import os
 import inspect
 import json
 import math
-from models.mgraph import MGraph
 from models.mlck import MultiLevelClassificationK
 from models.coarsening import Coarsening
 from models.solutionfinding import SolutionFinding
@@ -48,7 +47,6 @@ def main():
         args.update_json(options)
         args.check_output(options)
 
-
     # Load bipartite graph
     with timing.timeit_context_add('Load graph'):
 
@@ -88,42 +86,44 @@ def main():
 
         # Solution finding
         with timing.timeit_context_add('Solution finding'):
+            labels_true = None
+            if options.file_labels_true:
+                labels_true = numpy.loadtxt(options.file_labels_true)
 
             coarsest_graph = coarsening.graph_hierarchy[-1]
-            print('coarsest', coarsest_graph['vertices'], options.max_size)
+            # coarsest_graph = coarsening.graph_hierarchy[0]
+            print('coarsest', coarsest_graph['vertices'])
             if options.max_size and options.max_size != coarsest_graph['vertices']:
                 print('Warning: The required minimum number of vertices is not reached. Adjust parameters '
                       'for a better result.')
-            sf = SolutionFinding(coarsest_graph)
+
+            kwargs = dict(
+                schema=options.schema, labels_true=labels_true, particao_principal=options.particao_principal
+            )
+            sf = SolutionFinding(coarsest_graph, **kwargs)
+            # sf.naive_community_detection()
+            sf.gnetmine()
 
         # Uncoarsening
         with timing.timeit_context_add('Uncoarsening'):
 
             uncoarsening = Uncoarsening(coarsening.graph_hierarchy, initial_solution=sf.solution)
-            uncoarsening.naive_uncoarsening_community_detection()
+            uncoarsening.naive_uncoarsening()
 
         # Compute metrics
         with timing.timeit_context_add('Compute metrics'):
 
             if options.metrics and (options.save_metrics_csv or options.save_metrics_json or options.show_metrics):
                 labels_pred = numpy.array(uncoarsening.final_solution)
-                labels_true = None
-                if options.file_labels_true:
-                    labels_true = numpy.loadtxt(options.file_labels_true)
-                validation = Validation(source_graph, labels_true, labels_pred, options.schema)
+                validation = Validation(source_graph, labels_true[:coarsening.graph_hierarchy[0]['vertices'][0]], labels_pred, options.schema)
 
-                if 'nmi' in options.metrics:
-                    validation.compute_normalized_mutual_info_score()
-                if 'ars' in options.metrics:
-                    validation.compute_adjusted_rand_score()
-                if 'murata_modularity' in options.metrics:
-                    validation.compute_murata_modularity()
-                if 'barber_modularity' in options.metrics:
-                    validation.compute_barber_modularity()
-                if 'one_mode_modularity' in options.metrics:
-                    validation.compute_one_mode_modularity()
-                if 'one_mode_conductance' in options.metrics:
-                    validation.compute_one_mode_conductance()
+                if 'accuracy' in options.metrics:
+                    validation.compute_accuracy()
+                # if 'nmi' in options.metrics:
+                #     validation.compute_normalized_mutual_info_score()
+                # if 'ars' in options.metrics:
+                #     validation.compute_adjusted_rand_score()
+
 
         # Save
         with timing.timeit_context_add('Save'):
@@ -154,7 +154,7 @@ def main():
                     , 'matching': options.matching
                     , 'max_size': options.max_size
                     , 'itr': options.itr
-                    , 'itr_convergence': coarsest_graph['itr_convergence']
+                    # , 'itr_convergence': coarsest_graph['itr_convergence']
                     , 'level': coarsest_graph['level']
                 }
 

@@ -1,50 +1,87 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from random import randint
 
-"""
-MFKN: Multilevel framework for kpartite networks
+import numpy as np
+import scipy.sparse as sp
 
-::Solution Finding
+from gnetmine_bnoc import GNetMine
 
-Copyright (C) 2020 Alan Valejo <alanvalejo@gmail.com> All rights reserved
-
-This program comes with ABSOLUTELY NO WARRANTY. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS
-WITH YOU.
-
-Owner or contributors are not liable for any direct, indirect, incidental, special, exemplary, or consequential
-damages, (such as loss of data or profits, and others) arising in any way out of the use of this software,
-even if advised of the possibility of such damage.
-
-This program is free software and distributed in the hope that it will be useful: you can redistribute it and/or
-modify it under the terms of the GNU General Public License as published by the Free Software Foundation,
-either version 3 of the License, or (at your option) any later version. See the GNU General Public License for more
-details. You should have received a copy of the GNU General Public License along with this program. If not,
-see http://www.gnu.org/licenses/.
-
-Giving credit to the author by citing the papers.
-"""
-
-__maintainer__ = 'Alan Valejo'
-__email__ = 'alanvalejo@gmail.com'
-__author__ = 'Alan Valejo'
-__credits__ = ['Alan Valejo']
-__homepage__ = 'https://www.alanvalejo.com.br'
-__license__ = 'GNU.GPL.v3'
-__docformat__ = 'markdown en'
-__version__ = '0.1'
-__date__ = '2020-05-05'
 
 class SolutionFinding:
 
-    def __init__(self, coarsest_graph, **kwargs):
+    def __init__(self, graph, **kwargs):
 
         prop_defaults = {}
 
         self.__dict__.update(prop_defaults)
         self.__dict__.update(kwargs)
 
-        self.coarsest_graph = coarsest_graph
+        self.graph = graph
         self.solution = None
 
     def naive_community_detection(self):
-        self.solution = range(self.coarsest_graph.vcount())
+        self.solution = range(self.graph.vcount())
+
+    def gnetmine(self):
+        def desencapsular(propriedade):
+            try:
+                while True:
+                    propriedade = propriedade[0]
+            except TypeError:
+                return propriedade
+        types_array = self.graph.vs.get_attribute_values('type')
+        types = {id + 1: type for id, type in enumerate(types_array)}
+
+        k = len(self.graph['vertices'])
+        offset = [sum(self.graph['vertices'][0: i]) for i in range(k)]
+
+        matrices = {}
+        for edge in self.graph.es():
+            vertice1 = self.graph.vs[edge.tuple[0]]
+            type1 = vertice1['type']
+            name1 = desencapsular(vertice1['name'])
+            vertice2 = self.graph.vs[edge.tuple[1]]
+            type2 = vertice2['type']
+            name2 = desencapsular(vertice2['name'])
+
+            if str(type1) not in matrices:
+                matrices[str(type1)] = {}
+            if str(type2) not in matrices[str(type1)]:
+                matrices[str(type1)][str(type2)] = np.zeros((self.graph['vertices'][type1], self.graph['vertices'][type2]), dtype=int)
+
+            matrices[str(type1)][str(type2)][name1-offset[type1]][name2-offset[type2]] = edge['weight']
+
+        connections = {}
+        for x1 in matrices:
+            for x2 in matrices[x1]:
+                R = sp.csc_matrix(matrices[x1][x2])
+
+                D1 = np.diag(np.array(np.power(R.sum(axis=1), -0.5)).flatten())
+                D2 = np.diag(np.array(np.power(R.sum(axis=0), -0.5)).flatten())
+
+                out = sp.csc_matrix(D1) * R * sp.csc_matrix(D2)
+
+                connections[x1+x2], connections[x2+x1] = out, sp.csc_matrix.transpose(out)
+
+        labels = {}
+        for vertex in self.graph.vs():
+            name = desencapsular(vertex['name'])
+            # ainda nao entendi pq source eh uma lista, mas eh assim q o uncoarsening faz
+            for source in vertex['source']:
+                if self.labels_true[source] != -1:
+                    labels[name+1] = int(self.labels_true[source])
+
+        labels_por_particao = {str(i): {} for i in range(k)}
+        for id in labels:
+            labels_por_particao[str(types[id])][id] = labels[id]
+
+        if self.particao_principal:
+            for particao in range(1, k):
+                del labels_por_particao[str(particao)]
+
+        y, multilabel_y = GNetMine(connections, self.graph['vertices'], 100,
+                                   labels=labels_por_particao)
+
+        # y ta dividido por particao, vou retornar soh da particao principal
+        self.solution = y['0']
