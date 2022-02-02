@@ -72,6 +72,16 @@ class SolutionFinding:
                 if self.labels_true[source] != -1:
                     labels[name+1] = int(self.labels_true[source])
 
+
+        # amostragem (1/cv)% dos nós para o treinamento:
+        labels_amostragem = {}
+        cv = 100
+        for id in labels:
+            r = randint(1, cv)
+            if r == 1:
+                labels_amostragem[id] = labels[id]
+        labels = labels_amostragem
+
         labels_por_particao = {str(i): {} for i in range(k)}
         for id in labels:
             labels_por_particao[str(types[id])][id] = labels[id]
