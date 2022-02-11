@@ -75,7 +75,7 @@ class SolutionFinding:
 
         # amostragem (1/cv)% dos nós para o treinamento:
         labels_amostragem = {}
-        cv = 100
+        cv = 5
         for id in labels:
             r = randint(1, cv)
             if r == 1:
@@ -90,8 +90,8 @@ class SolutionFinding:
             for particao in range(1, k):
                 del labels_por_particao[str(particao)]
 
-        y, multilabel_y = GNetMine(connections, self.graph['vertices'], 100,
-                                   labels=labels_por_particao)
+        y, multilabel_y = GNetMine(connections, self.graph['vertices'],
+                                   labels=labels_por_particao, communities=self.communities)
 
         # y ta dividido por particao, vou retornar soh da particao principal
         self.solution = y['0']
