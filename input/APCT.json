@@ -6,16 +6,22 @@
         8920
     ],
     "reduction_factor": [
-        0.3
+        0.7
     ],
     "max_levels": [
-        3
+        10
     ],
     "max_size": [
-        15,
+        14475,
         15,
         15,
         15
+    ],
+    "communities": [
+        4,
+        4,
+        4,
+        4
     ],
     "matching": "multi-label",
     "seed_priority": "random",
