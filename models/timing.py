@@ -109,5 +109,6 @@ class Timing(object):
 		start = time.time()
 		yield
 		elapsed = time.time() - start
+		print(name, elapsed // 60, 'm ', '%.2f s' % (elapsed % 60))
 		self.rows.append(name)
 		self.elapsed_set.append([elapsed // 60, '%.4f' % (elapsed % 60)])
