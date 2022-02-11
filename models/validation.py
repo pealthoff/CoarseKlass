@@ -207,7 +207,7 @@ class Validation:
 
     def compute_adjusted_rand_score(self):
         args = []
-        for layer in range(self.graph['layers']):
+        for layer in range(self.graph['layers'])[:1]:
             try:
                 args.append(metrics.cluster.adjusted_rand_score(self.labels_true_split[layer], self.labels_pred_split[layer]))
             except ValueError:
@@ -223,7 +223,7 @@ class Validation:
 
     def compute_adjusted_mutual_info_score(self):
         args = []
-        for layer in range(self.graph['layers']):
+        for layer in range(self.graph['layers'])[:1]:
             args.append(metrics.cluster.adjusted_mutual_info_score(self.labels_true_split[layer], self.labels_pred_split[layer]))
 
         average = sum(args) / len(args)
@@ -236,7 +236,7 @@ class Validation:
 
     def compute_mutual_info_score(self):
         args = []
-        for layer in range(self.graph['layers']):
+        for layer in range(self.graph['layers'])[:1]:
             args.append(metrics.cluster.mutual_info_score(self.labels_true_split[layer], self.labels_pred_split[layer]))
 
         average = sum(args) / len(args)
@@ -249,7 +249,7 @@ class Validation:
 
     def compute_normalized_mutual_info_score(self):
         args = []
-        for layer in range(self.graph['layers']):
+        for layer in range(self.graph['layers'])[:1]:
             args.append(metrics.cluster.normalized_mutual_info_score(self.labels_true_split[layer], self.labels_pred_split[layer]))
 
         average = sum(args) / len(args)
@@ -291,7 +291,7 @@ class Validation:
 
         average = self.format.format(sum(args) / len(args))
         args = []
-        for layer in range(self.graph['layers']):
+        for layer in range(self.graph['layers'])[:1]:
             args.append('-')
         args.append(average)
 
@@ -305,7 +305,7 @@ class Validation:
         Q = Qbip(W, gg, gh)
 
         args = []
-        for layer in range(self.graph['layers']):
+        for layer in range(self.graph['layers'])[:1]:
             args.append('-')
         args.append(Q)
 
