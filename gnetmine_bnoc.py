@@ -14,15 +14,19 @@ import time
 # S: PA, AP, PC, CP, PT, TP, AC, CA
 # particao APCT: '0', '1', '2', '3';
 
-def GNetMine(S, num_vertices_por_particao, t=100, a=0.1, l=0.2, labels={}):
+def GNetMine(S, num_vertices_por_particao, t=100, a=0.1, l=0.2, labels={}, communities=[]):
     k = len(num_vertices_por_particao)
+    if len(communities) == 0:
+        max_comm = k
+    else:
+        max_comm = max(communities)
 
     offset = [sum(num_vertices_por_particao[0: i]) for i in range(k)]
     # label the items
-    y = {str(n): [np.zeros((num_vertices_por_particao[n], 1)) for _ in range(k)] for n in range(k)}
+    y = {str(n): [np.zeros((num_vertices_por_particao[n], 1)) for _ in range(max_comm)] for n in range(k)}
     for particao in labels:
         for i in labels[particao]:
-            y[particao][labels[particao][i] - 1][i - offset[int(particao)] - 1, 0] = 1
+            y[particao][labels[particao][i]][i - offset[int(particao)] - 1, 0] = 1
             # y[particao][label[particao][i] - 1][i - 1, 0] = 1
 
     others = {str(i): [str(i) + str(j) for j in range(k) if j != i and str(i) + str(j) in S] for i in range(k)}
@@ -30,12 +34,12 @@ def GNetMine(S, num_vertices_por_particao, t=100, a=0.1, l=0.2, labels={}):
     # iterate until converge
     old_f = y
     for _ in range(t):
-        new_f = {str(n): [np.zeros((num_vertices_por_particao[n], 1)) for _ in range(k)] for n in range(k)}
+        new_f = {str(n): [np.zeros((num_vertices_por_particao[n], 1)) for _ in range(max_comm)] for n in range(k)}
         for particao in old_f:
-            for j, fk in enumerate(old_f[particao]):
+            for j, fjk in enumerate(old_f[particao]):
                 sf = sum([S[i] * old_f[i[1]][j] for i in others[particao]])
-                new_f[particao][j] = (l * sf + 2 * l * fk + a * y[particao][j]) \
-                                     / (len(others[particao]) * l + 2 * l + a)
+                new_f[particao][j] = (l * sf + 2 * l * fjk + a * y[particao][j]) \
+                                 / (len(others[particao]) * l + 2 * l + a)
         old_f = new_f
         # print new_f
 
@@ -44,7 +48,7 @@ def GNetMine(S, num_vertices_por_particao, t=100, a=0.1, l=0.2, labels={}):
     out = {str(n): np.zeros(num_vertices_por_particao[n]) for n in range(k)}
     for particao in f:
         for i in range(len(f[particao][0])):
-            out[particao][i] = np.argmax([f[particao][j][i] for j in range(k)]) + 1
+            out[particao][i] = np.argmax([f[particao][j][i] for j in range(k)])
 
     # print [out[i].tolist() for i in out]
     return out, f
