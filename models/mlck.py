@@ -217,45 +217,46 @@ class MultiLevelClassificationK(MGraph):
         self._score(propagators)
 
         for r in random.sample(receivers, len(receivers)):
-            if self.degree(r) > 0:
+            if self.degree(r) > 0 and len(self.neighborhood_from_guide[r]) > 0:
                 old_labels, old_freqs = zip(*self.vs[r]['label'])
                 label_freq, sum_freq = self._frequency(r)
-                freq_max = max(label_freq.values())
-                new_labels_freqs = [(label, freq / sum_freq) for label, freq in label_freq.items()
-                                    if freq / freq_max >= self.threshold]
-                new_labels, new_freqs = zip(*nlargest(self.max_prop_label, new_labels_freqs, key=lambda e: e[1]))
+                if len(label_freq) > 0:
+                    freq_max = max(label_freq.values())
+                    new_labels_freqs = [(label, freq / sum_freq) for label, freq in label_freq.items()
+                                        if freq / freq_max >= self.threshold]
+                    new_labels, new_freqs = zip(*nlargest(self.max_prop_label, new_labels_freqs, key=lambda e: e[1]))
 
-                if self.upper_bound is not None:
-                    for label in new_labels:
-                        if self.w_comms[layer][label] + self.vs[r]['weight'] > self.upper_bound[layer]:
-                            new_labels = new_labels[1:]
-                            new_freqs = new_freqs[1:]
-                        else:
-                            break
-
-                if not self.until_convergence:
-                    if self.w_comms[layer][old_labels[0]] - self.vs[r]['weight'] <= 0:
+                    if self.upper_bound is not None:
                         for label in new_labels:
-                            if self.w_comms[layer][label] > 0:
-                                if self.n_comms[layer] - 1 < self.max_size[layer]:
-                                    new_labels = new_labels[1:]
-                                    new_freqs = new_freqs[1:]
-                                else:
-                                    break
+                            if self.w_comms[layer][label] + self.vs[r]['weight'] > self.upper_bound[layer]:
+                                new_labels = new_labels[1:]
+                                new_freqs = new_freqs[1:]
                             else:
                                 break
 
-                if new_labels:
-                    self.vs[r]['label'] = list(zip(new_labels, new_freqs))
-                    if old_labels != new_labels:
-                        convergence = False
-                        if old_labels[0] != new_labels[0]:
-                            self.w_comms[layer][old_labels[0]] -= self.vs[r]['weight']
-                            if self.w_comms[layer][old_labels[0]] <= 0:
-                                self.n_comms[layer] -= 1
-                            if self.w_comms[layer][new_labels[0]] <= 0:
-                                self.n_comms[layer] += 1
-                            self.w_comms[layer][new_labels[0]] += self.vs[r]['weight']
+                    if not self.until_convergence:
+                        if self.w_comms[layer][old_labels[0]] - self.vs[r]['weight'] <= 0:
+                            for label in new_labels:
+                                if self.w_comms[layer][label] > 0:
+                                    if self.n_comms[layer] - 1 < self.max_size[layer]:
+                                        new_labels = new_labels[1:]
+                                        new_freqs = new_freqs[1:]
+                                    else:
+                                        break
+                                else:
+                                    break
+
+                    if new_labels:
+                        self.vs[r]['label'] = list(zip(new_labels, new_freqs))
+                        if old_labels != new_labels:
+                            convergence = False
+                            if old_labels[0] != new_labels[0]:
+                                self.w_comms[layer][old_labels[0]] -= self.vs[r]['weight']
+                                if self.w_comms[layer][old_labels[0]] <= 0:
+                                    self.n_comms[layer] -= 1
+                                if self.w_comms[layer][new_labels[0]] <= 0:
+                                    self.n_comms[layer] += 1
+                                self.w_comms[layer][new_labels[0]] += self.vs[r]['weight']
 
         return convergence
 
