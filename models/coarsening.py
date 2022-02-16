@@ -103,6 +103,8 @@ class Coarsening:
                 if coarsened_graph['vertices'][layer] < graph['vertices'][layer]:
                     coarsened_graph['level'][layer] += 1
 
+            coarsened_graph.load_guides()
+
             self.graph_hierarchy.append(coarsened_graph)
             self.level_hierarchy.append(coarsened_graph['level'][:])
 
