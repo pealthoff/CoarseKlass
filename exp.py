@@ -65,10 +65,7 @@ def main():
         )
 
         source_graph = MultiLevelClassificationK(**kwargs)
-        if options.type_filename:
-            source_graph.load(options.input, type_filename=options.type_filename)
-        else:
-            source_graph.load(options.input, vertices=options.vertices)
+        source_graph.load(options.input, type_filename=options.type_filename)
 
         if options.upper_bound is not None:
             source_graph.upper_bound = []
