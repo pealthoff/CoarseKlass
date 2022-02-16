@@ -123,6 +123,7 @@ class MultiLevelClassificationK(MGraph):
         coarse.vs['predecessor'] = predecessors
         coarse['layers'] = self['layers']
         coarse['similarity'] = None
+        coarse.schema = self.schema
         coarse['vertices'] = []
         coarse['itr_convergence'] = self.itr_convergence
 
@@ -151,11 +152,14 @@ class MultiLevelClassificationK(MGraph):
 
         return coarse
 
+    def load_guides(self):
+        self.calculate_guides()
+        self.calculate_neighborhood_from_guide()
+
     def load(self, filename, filetype='ncol', vertices=None, type_filename=None):
         super(MultiLevelClassificationK, self).load(filename, filetype=filetype, vertices=vertices, type_filename=type_filename)
         self.validate()
-        self.calculate_guides()
-        self.calculate_neighborhood_from_guide()
+        self.load_guides()
 
     def validate(self):
 
