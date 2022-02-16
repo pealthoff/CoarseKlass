@@ -220,6 +220,10 @@ def main():
         timing.save_csv(options.output + '-timing.csv')
     if options.save_timing_json:
         timing.save_json(options.output + '-timing.json')
+
+    for level in range(len(coarsening.graph_hierarchy)):
+        print((len(coarsening.graph_hierarchy[level].vs) - len(source_graph.vs.select(type=0))) / (
+                    len(coarsening.graph_hierarchy[0].vs) - len(source_graph.vs.select(type=0))))
     print("ok")
 
 
