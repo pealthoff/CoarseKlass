@@ -24,15 +24,6 @@ class NpEncoder(json.JSONEncoder):
         else:
             return super(NpEncoder, self).default(obj)
 
-def validate(options):
-
-    # Matching method validation
-    valid_matching = ['single-label', 'multi-label']
-    options.matching = options.matching.lower()
-    if options.matching not in valid_matching:
-        print('Matching ' + options.matching + ' method is invalid.')
-        print('Please select an option: ' + ', '.join(valid_matching))
-        sys.exit(1)
 
 def main():
     coarsening = False
