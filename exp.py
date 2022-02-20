@@ -68,11 +68,10 @@ def main():
             # with open(options.output + '.graph', 'wb') as graph_file:
             #     pickle.dump(source_graph, graph_file)
 
+        labels_true = numpy.loadtxt(options.file_labels_true)
+
 
     with timing.timeit_context_add('Classificacao sem coarsening'):
-        labels_true = None
-        if options.file_labels_true:
-            labels_true = numpy.loadtxt(options.file_labels_true)
 
         kwargs = dict(
             schema=options.schema, labels_true=labels_true, particao_principal=options.particao_principal, communities=options.communities
@@ -107,10 +106,6 @@ def main():
 
         # Solution finding
         with timing.timeit_context_add('Solution finding'):
-            labels_true = None
-            if options.file_labels_true:
-                labels_true = numpy.loadtxt(options.file_labels_true)
-
             coarsest_graph = coarsening.graph_hierarchy[-1]
             # coarsest_graph = coarsening.graph_hierarchy[0]
             print('coarsest', coarsest_graph['vertices'])
