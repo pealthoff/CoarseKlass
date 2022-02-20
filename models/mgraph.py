@@ -44,15 +44,17 @@ def load_ncol(filename):
     Load ncol npartite graph and generate special attributes
     """
 
-    data = numpy.loadtxt(filename, skiprows=0, dtype=str)
-    dict_edges = dict()
-    for row in data:
-        if len(row) == 3:
-            dict_edges[(int(row[0]), int(row[1]))] = float(row[2])
-        else:
-            dict_edges[(int(row[0]), int(row[1]))] = 1
+    # data = numpy.loadtxt(filename, skiprows=0, dtype=str)
+    with open(filename, 'rb') as data:
+        dict_edges = dict()
+        for data_row in data:
+            row = data_row.split()
+            if len(row) == 3:
+                dict_edges[(int(row[0]), int(row[1]))] = float(row[2])
+            else:
+                dict_edges[(int(row[0]), int(row[1]))] = 1
 
-    edges, weights = list(zip(*dict_edges.items()))
+        edges, weights = list(zip(*dict_edges.items()))
     return edges, weights
 
 class MGraph(Graph):
