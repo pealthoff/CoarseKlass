@@ -55,15 +55,17 @@ for target_vertices in range(100, 1000, 100):
 
             # for key, noise in enumerate(noise_set):
             for i in range(1):
-                noise = 0.1
+                noise_value = 0.100
+                noise = float("{:.3f}".format(noise_value))
 
-                for key, dispersion in enumerate(dispersion_set):
+                for dispersion_value in numpy.arange(0.1, 1, 0.01):
                 #for i in range(1):
-
-                        for itr in range(max_itr):
+                    dispersion = float("{:.3f}".format(dispersion_value))
+                    for itr in range(max_itr):
 
                             filename = "v_" + str(target_vertices) + "-s_" + id + "-c_" + str(num_communities) + "-n_" \
-                                       + str(noise) + "-d" + str(dispersion) + "-itr_" + str(itr)
+                                       + "{:.3f}".format(noise) + "-d" + "{:.3f}".format(dispersion) + "-itr_" + str(itr)
+                            print(filename)
 
                             _dict = {
                                 "output_directory":  graphs_directory,
