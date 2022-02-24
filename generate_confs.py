@@ -53,9 +53,12 @@ for target_vertices in range(100, 1000, 100):
         for num_communities in communities_set:
             communities = [num_communities] * layers
 
-            for key, noise in enumerate(noise_set):
+            # for key, noise in enumerate(noise_set):
+            for i in range(1):
+                noise = 0.1
 
                 for key, dispersion in enumerate(dispersion_set):
+                #for i in range(1):
 
                         for itr in range(max_itr):
 
