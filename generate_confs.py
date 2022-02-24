@@ -59,7 +59,8 @@ for target_vertices in range(100, 1000, 100):
 
                         for itr in range(max_itr):
 
-                            filename = "v_" + target_vertices + "-s_" + id + "-c_" + num_communities + "-n_" + noise + "-d" + dispersion + "-itr_" + itr
+                            filename = "v_" + str(target_vertices) + "-s_" + id + "-c_" + str(num_communities) + "-n_" \
+                                       + str(noise) + "-d" + str(dispersion) + "-itr_" + str(itr)
 
                             _dict = {
                                 "output_directory":  graphs_directory,
