@@ -64,6 +64,15 @@ class MultiLevelClassificationK(MGraph):
         self.coarsening_order = added
 
     def calculate_neighborhood_from_guide(self):
+        # edges_to_exclude = []
+        # for edge in self.es():
+        #     v = self.vs[edge.tuple[0]]
+        #     u = self.vs[edge.tuple[1]]
+        #
+        #     if ((v['type'] != self.target_partition or v['type'] != self.target_partition) and (self.guides[v['type']] != u['type'] and self.guides[u['type']] != v['type'])):
+        #         edges_to_exclude.append((u, v))
+        # self.delete_edges(edges_to_exclude)
+
         for layer in range(self['layers']):
             if layer == self.target_partition:
                 guide_vertices = []

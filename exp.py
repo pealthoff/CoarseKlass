@@ -43,10 +43,6 @@ def main():
     # Load bipartite graph
     with timing.timeit_context_add('Load graph'):
 
-        # try:
-            # with open(options.output + '.graph', 'rb') as graph_file:
-            #     source_graph = pickle.load(graph_file)
-        # except FileNotFoundError:
         kwargs = dict(
             itr=options.itr, threshold=options.threshold,
             reverse=options.reverse, seed_priority=options.seed_priority,
@@ -223,8 +219,7 @@ def main():
 
     for level in range(len(coarsening.graph_hierarchy)):
         print((len(coarsening.graph_hierarchy[level].vs) - len(source_graph.vs.select(type=0))) / (
-                    len(coarsening.graph_hierarchy[0].vs) - len(source_graph.vs.select(type=0))))
-    print("ok")
+                len(coarsening.graph_hierarchy[0].vs) - len(source_graph.vs.select(type=0))))
 
 
 if __name__ == "__main__":
