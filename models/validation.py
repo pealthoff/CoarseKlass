@@ -191,7 +191,7 @@ class Validation:
             self.labels_pred_split.append(labels_pred[indices_with_label_true])
             self.labels_true_split.append(labels_true[indices_with_label_true])
 
-    def compute_accuracy(self):
+    def compute_accuracy(self, label=''):
         args = []
         for layer in range(self.graph['layers'])[:1]:
             args.append(metrics.accuracy_score(self.labels_true_split[layer], self.labels_pred_split[layer]))
@@ -201,7 +201,7 @@ class Validation:
         for key, value in enumerate(args):
             args[key] = self.format.format(args[key])
 
-        self.rows_name.append('accuracy')
+        self.rows_name.append('accuracy' + label)
         self.rows_value.append(args)
 
 

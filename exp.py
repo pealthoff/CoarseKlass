@@ -64,17 +64,20 @@ def main():
                 source_graph.upper_bound.append(int(
                     math.ceil(((1.0 + (options.upper_bound[layer] * (source_graph.max_size[layer] - 1)))
                                * source_graph['vertices'][layer]) / source_graph.max_size[layer])
-                    ))
+                ))
             # with open(options.output + '.graph', 'wb') as graph_file:
             #     pickle.dump(source_graph, graph_file)
 
         labels_true = numpy.loadtxt(options.file_labels_true)
-
-
+        indices = source_graph.vs.select(type=0).indices  # particao alvo
+        indices_with_label_true = [i for i in indices if labels_true[i] != -1]
+        sample_indices = numpy.random.choice(indices_with_label_true, size=math.ceil(len(indices) * amostragem),
+                                             replace=False)
     with timing.timeit_context_add('Classificacao sem coarsening'):
 
         kwargs = dict(
-            schema=options.schema, labels_true=labels_true, particao_principal=options.particao_principal, communities=options.communities
+            schema=options.schema, labels_true=labels_true, particao_principal=options.particao_principal,
+            communities=options.communities, sample_indices=sample_indices
         )
         sf = SolutionFinding(source_graph, **kwargs)
         # sf.naive_community_detection()
@@ -85,7 +88,7 @@ def main():
         # labels_pred = numpy.random.randint(1, 4 + 1, size=len(labels_pred))
         validation = Validation(source_graph, labels_true,
                                 labels_pred, options.schema)
-        validation.compute_accuracy()
+        validation.compute_accuracy(" sem coarsening")
 
         print()
         validation.print_tabular()
@@ -114,16 +117,17 @@ def main():
                       'for a better result.')
 
             kwargs = dict(
-                schema=options.schema, labels_true=labels_true, particao_principal=options.particao_principal, communities=options.communities
+                schema=options.schema, labels_true=labels_true, particao_principal=options.particao_principal,
+                communities=options.communities, sample_indices=sample_indices,
             )
-            sf = SolutionFinding(coarsest_graph, **kwargs)
+            sfc = SolutionFinding(coarsest_graph, **kwargs)
             # sf.naive_community_detection()
-            sf.gnetmine()
+            sfc.gnetmine()
 
         # Uncoarsening
         with timing.timeit_context_add('Uncoarsening'):
 
-            uncoarsening = Uncoarsening(coarsening.graph_hierarchy, initial_solution=sf.solution)
+            uncoarsening = Uncoarsening(coarsening.graph_hierarchy, initial_solution=sfc.solution)
             uncoarsening.naive_uncoarsening()
 
         # Compute metrics
@@ -131,7 +135,8 @@ def main():
 
             if options.metrics and (options.save_metrics_csv or options.save_metrics_json or options.show_metrics):
                 labels_pred = numpy.array(uncoarsening.final_solution)
-                validation = Validation(source_graph, labels_true[:coarsening.graph_hierarchy[0]['vertices'][0]], labels_pred, options.schema)
+                validation = Validation(source_graph, labels_true[:coarsening.graph_hierarchy[0]['vertices'][0]],
+                                        labels_pred, options.schema)
 
                 if 'accuracy' in options.metrics:
                     validation.compute_accuracy()

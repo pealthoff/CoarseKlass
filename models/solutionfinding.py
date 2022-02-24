@@ -75,11 +75,8 @@ class SolutionFinding:
 
         # amostragem (1/cv)% dos nós para o treinamento:
         labels_amostragem = {}
-        cv = 5
-        for id in labels:
-            r = randint(1, cv)
-            if r == 1:
-                labels_amostragem[id] = labels[id]
+        for id in self.sample_indices:
+            labels_amostragem[id+1] = labels[id+1]
         labels = labels_amostragem
 
         labels_por_particao = {str(i): {} for i in range(k)}
