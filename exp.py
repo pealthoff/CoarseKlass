@@ -26,6 +26,11 @@ class NpEncoder(json.JSONEncoder):
 
 
 def main():
+    exp()
+
+
+def exp():
+    amostragem = 0.2
     coarsening = False
     coarsening = True
     # Timing instance
