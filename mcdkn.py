@@ -43,15 +43,6 @@ from models.validation import Validation
 
 from models.timing import Timing
 
-__maintainer__ = 'Alan Valejo'
-__email__ = 'alanvalejo@gmail.com'
-__author__ = 'Alan Valejo'
-__credits__ = ['Alan Valejo']
-__homepage__ = 'https://www.alanvalejo.com.br'
-__license__ = 'GNU.GPL.v3'
-__docformat__ = 'markdown en'
-__version__ = '0.1.0'
-__date__ = '2020-05-05'
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -64,15 +55,6 @@ class NpEncoder(json.JSONEncoder):
         else:
             return super(NpEncoder, self).default(obj)
 
-def validate(options):
-
-    # Matching method validation
-    valid_matching = ['single-label', 'multi-label']
-    options.matching = options.matching.lower()
-    if options.matching not in valid_matching:
-        print('Matching ' + options.matching + ' method is invalid.')
-        print('Please select an option: ' + ', '.join(valid_matching))
-        sys.exit(1)
 
 def main():
     """
@@ -91,8 +73,6 @@ def main():
         args.update_json(options)
         args.check_output(options)
 
-        validate(options)
-
     # Load bipartite graph
     with timing.timeit_context_add('Load graph'):
 
@@ -103,10 +83,8 @@ def main():
             # , until_convergence=options.until_convergence
         )
 
-        if options.matching == 'multi-label':
-            source_graph = MultiLabelPropagation(**kwargs)
-        else:
-            source_graph = SingleLabelPropagation(**kwargs)
+        source_graph = MultiLabelPropagation(**kwargs)
+
         if options.type_filename:
             source_graph.load(options.input, type_filename=options.type_filename)
         else:
@@ -197,7 +175,6 @@ def main():
                 , 'achieved_levels': coarsest_graph['level']
                 , 'reduction_factor': options.reduction_factor
                 , 'max_levels': options.max_levels
-                , 'matching': options.matching
                 , 'max_size': options.max_size
                 , 'itr': options.itr
                 , 'itr_convergence': coarsest_graph['itr_convergence']

@@ -105,9 +105,10 @@ def check_output(options, output_default='out'):
 	if hasattr(options, 'input'):
 		output_default, options.extension = os.path.splitext(os.path.basename(options.input))
 	if options.output is None:
-		options.output = options.output_directory + output_default
-	else:
-		options.output = options.output_directory + options.output
+		options.output = output_default
+	options.coarse_output = options.coarse_graph_directory + options.output
+	options.metrics_output = options.metrics_directory + options.output
+	options.output = options.output_directory + options.output
 	if hasattr(options, 'unique_key') and options.unique_key:
 		now = datetime.now()
 		options.output = options.output_directory + options.output + '_' + now.strftime('%Y%m%d%H%M%S%f')
