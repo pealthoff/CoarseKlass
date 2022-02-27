@@ -113,8 +113,9 @@ for target_vertices in range(100, 1000, 100):
                 noise_value = 0.100
                 noise = float("{:.3f}".format(noise_value))
 
-                for dispersion_value in numpy.arange(0.1, 1, 0.01):
-                    # for i in range(1):
+                dispersion_value = 0.100
+                # for dispersion_value in numpy.arange(0.1, 1, 0.01):
+                for i in range(1):
                     dispersion = float("{:.3f}".format(dispersion_value))
                     for itr in range(max_itr):
                         filename = "v_" + str(target_vertices) + "-s_" + id + "-c_" + str(num_communities) + "-n_" \
@@ -124,4 +125,4 @@ for target_vertices in range(100, 1000, 100):
                             generate_conf(filename)
 
                         if args["mode"] == "graph":
-                            os.system('python ' + coarsening_directory +'bnoc/bnoc/bnoc.py -cnf ' + filename)
+                            os.system('nohup python ' + coarsening_directory +'bnoc/bnoc/bnoc.py -cnf ' + graphs_directory + filename + "&")
