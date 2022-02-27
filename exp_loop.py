@@ -54,8 +54,6 @@ def generate_conf(filename):
         "unweighetd": True,
         "normalize": True,
         "show_timing": True,
-        "save_metrics_csv": True,
-        "save_metrics_json": True,
 
         "unique_key": False,
         "hard": True,
@@ -81,17 +79,14 @@ def generate_conf(filename):
         "schema": schema,
         "until_convergence": False,
         "save_conf": False,
-        "save_ncol": False,
-        "save_type": False,
-        "save_membership": False,
+        "save_ncol": True,
+        "save_type": True,
+        "save_membership": True,
         "save_predecessor": False,
         "save_successor": False,
         "save_weight": False,
         "save_source": False,
-        "save_timing_csv": True,
-        "save_timing_json": False,
         "show_conf": False,
-        "show_metrics": True
     }
     dict_file = conf_directory + filename + ".json"
     with open(dict_file, "w+") as f:
