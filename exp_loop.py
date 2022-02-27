@@ -125,4 +125,4 @@ for target_vertices in range(100, 1000, 100):
                             generate_conf(filename)
 
                         if args["mode"] == "graph":
-                            os.system('nohup python ' + coarsening_directory +'bnoc/bnoc/bnoc.py -cnf ' + graphs_directory + filename + "&")
+                            os.system('nohup python ' + coarsening_directory +'bnoc/bnoc/bnoc.py -cnf ' + conf_directory + filename + "&")
