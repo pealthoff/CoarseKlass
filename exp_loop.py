@@ -52,7 +52,7 @@ def generate_conf(filename):
         "mu": 0.8,
         "noise": noise,
         "balanced": False,
-        "unweighetd": True,
+        "unweighted": True,
         "normalize": True,
         "show_timing": True,
 
