@@ -1,7 +1,6 @@
 import json
 import math
 import os
-import sys
 
 import numpy
 import argparse
@@ -120,7 +119,6 @@ for target_vertices in range(100, 1000, 100):
                 noise_range = [float(args["noise"])]
             for noise_value in noise_range:
                 noise = float("{:.3f}".format(noise_value))
-            # for noise_value in numpy.arange(0.1, 1, 0.01):
             for i in range(1):
                 noise_value = 0.100
                 noise = float("{:.3f}".format(noise_value))
