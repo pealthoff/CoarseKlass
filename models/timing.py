@@ -74,7 +74,7 @@ class Timing(object):
 			print(row_format.format(row, *item))
 
 	def save_csv(self, output):
-		with open(output, 'w+') as csvfile:
+		with open(output, 'w') as csvfile:
 			writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 			writer.writerow(self.header)
 			for row, item in zip(self.rows, self.elapsed_set):
@@ -83,7 +83,7 @@ class Timing(object):
 	def save_json(self, output):
 		dictionary = dict(zip(self.rows, self.elapsed_set))
 		dictionary['header'] = self.header
-		with open(output, 'w+') as jsonfile:
+		with open(output, 'w') as jsonfile:
 			json.dump(dictionary, jsonfile, indent=4)
 
 	def get_array(self):

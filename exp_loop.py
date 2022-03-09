@@ -11,20 +11,22 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--mode", required=True)
 ap.add_argument("-n", "--noise", required=False)
 ap.add_argument("-d", "--dispersion", required=False)
+ap.add_argument("-c", "--communities", required=False)
+ap.add_argument("-dir", "--directory", required=False)
 
 args = vars(ap.parse_args())
 print(args["mode"])
 
-coarsening_directory = "/home/paulo_althoff/development/coarsening/"
+if args["directory"] is None:
+    coarsening_directory = "/home/paulo_althoff/development/coarsening/"
+else:
+    coarsening_directory = args["directory"]
+
 conf_directory = coarsening_directory + "input/"
 graphs_directory = coarsening_directory + "graphs/"
 
 max_itr = 10
-max_itr_bnoc = 10
 schema = [[0, 1]]
-communities_set = range(4, 10)
-noise_set = numpy.linspace(0.0, 1.0, num=100)
-dispersion_set = numpy.linspace(0.0, 1.0, num=100)
 
 schemas = {
     's1': {
@@ -55,7 +57,6 @@ def generate_conf(filename):
         "unweighted": True,
         "normalize": True,
         "show_timing": True,
-
         "unique_key": False,
         "hard": True,
         "save_cover": False,
@@ -90,7 +91,7 @@ def generate_conf(filename):
         "show_conf": False,
     }
     dict_file = conf_directory + filename + ".json"
-    with open(dict_file, "w+") as f:
+    with open(dict_file, "w") as f:
         json.dump(_dict, f, indent=4)
 
 
@@ -106,7 +107,11 @@ for target_vertices in range(100, 1000, 100):
         max_levels = [100] * layers
         max_levels[0] = 0
 
-        for num_communities in communities_set:
+        if args["communities"] is None:
+            communities_range = range(4, 10)
+        else:
+            communities_range = [float(args["communities"])]
+        for num_communities in communities_range:
             communities = [num_communities] * layers
 
             if args["noise"] is None:
@@ -135,4 +140,7 @@ for target_vertices in range(100, 1000, 100):
                             generate_conf(filename)
 
                         if args["mode"] == "graph":
-                            os.system('nohup python ' + coarsening_directory +'bnoc/bnoc/bnoc.py -cnf ' + conf_directory + filename + ".json &")
+                            os.system('python ' + coarsening_directory +'bnoc/bnoc/bnoc.py -cnf ' + conf_directory + filename + ".json")
+
+                        if args["mode"] == "class":
+                            os.system('python ' + coarsening_directory + 'cmk/exp.py -cnf ' + graphs_directory + filename + ".json")
