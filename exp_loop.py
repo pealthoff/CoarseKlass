@@ -109,14 +109,22 @@ for target_vertices in range(100, 1000, 100):
         for num_communities in communities_set:
             communities = [num_communities] * layers
 
+            if args["noise"] is None:
+                noise_range = numpy.arange(0.1, 1, 0.1)
+            else:
+                noise_range = [float(args["noise"])]
+            for noise_value in noise_range:
+                noise = float("{:.3f}".format(noise_value))
             # for noise_value in numpy.arange(0.1, 1, 0.01):
             for i in range(1):
                 noise_value = 0.100
                 noise = float("{:.3f}".format(noise_value))
 
-                dispersion_value = 0.100
-                for dispersion_value in numpy.arange(0.10, 1, 0.1):
-                #for i in range(1):
+                if args["dispersion"] is None:
+                    dispersion_range = numpy.arange(0.10, 1, 0.1)
+                else:
+                    dispersion_range = [float(args["dispersion"])]
+                for dispersion_value in dispersion_range:
                     dispersion = float("{:.3f}".format(dispersion_value))
                     for itr in range(max_itr):
                         filename = "v_" + str(target_vertices) + "-s_" + id + "-c_" + str(num_communities) + "-n_" \
