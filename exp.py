@@ -38,7 +38,7 @@ def main():
 
 def exp():
     # Timing instance
-    metrics_writer = Timing(['Snippet', 'Time [m]', 'Time [s]'])
+    metrics_writer = Timing(['Snippet', 'Time [min]', 'Time [sec]'])
 
 
     # Setup parse options command line
@@ -90,7 +90,7 @@ def exp():
 
     for index, row in enumerate(metrics_writer.elapsed_set):
         metrics_writer.elapsed_set[index] = ['--', '--'] + row + ['--']
-    metrics_writer.header = ['Snippet', 'Amostragem', 'Reduction', 'Time [min]', 'Time [s]', 'Accuracy']
+    metrics_writer.header = ['Snippet', 'Amostragem', 'Reduction', 'Time [min]', 'Time [sec]', 'Accuracy']
 
     for amostragem in set([0.01, 0.1, 0.2, 0.5]):
     # for amostragem in set([0.2]):
