@@ -94,8 +94,7 @@ def update_json(options):
 			argparse_dict.update(json_dict)
 
 def check_output(options, output_default='out'):
-
-	if options.output_directory is None:
+	if not hasattr(options, 'output_directory'):
 		options.output_directory = os.path.dirname(os.path.abspath(options.input)) + '/'
 	else:
 		if not os.path.exists(options.output_directory):
