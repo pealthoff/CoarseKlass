@@ -136,7 +136,7 @@ for target_vertices in vertices_range:
                     if args["iterations"] is None:
                         iterations_range = range(max_itr)
                     else:
-                        iterations_range = range(int(args["vertices"]))
+                        iterations_range = range(int(args["iterations"]))
                     for itr in iterations_range:
                         filename = "v_" + str(target_vertices) + "-s_" + id + "-c_" + str(num_communities) + "-n_" \
                                    + "{:.3f}".format(noise) + "-d" + "{:.3f}".format(dispersion) + "-itr_" + str(itr)
