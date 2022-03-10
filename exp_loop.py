@@ -11,6 +11,7 @@ ap.add_argument("-m", "--mode", required=True)
 ap.add_argument("-n", "--noise", required=False)
 ap.add_argument("-d", "--dispersion", required=False)
 ap.add_argument("-c", "--communities", required=False)
+ap.add_argument("-v", "--vertices", required=False)
 ap.add_argument("-dir", "--directory", required=False)
 
 args = vars(ap.parse_args())
@@ -95,7 +96,11 @@ def generate_conf(filename):
         json.dump(_dict, f, indent=4)
 
 
-for target_vertices in range(100, 1000, 100):
+if args["vertices"] is None:
+    vertices_range = range(100, 1000, 100)
+else:
+    vertices_range = [int(args["vertices"])]
+for target_vertices in vertices_range:
     for id in schemas:
         layers = schemas[id]['layers']
         schema = schemas[id]['schema']
@@ -136,6 +141,7 @@ for target_vertices in range(100, 1000, 100):
                             generate_conf(filename)
 
                         if args["mode"] == "graph":
+                            print('python "' + coarsening_directory +'bnoc/bnoc/bnoc.py" -cnf "' + conf_directory + filename + '.json"')
                             os.system('python "' + coarsening_directory +'bnoc/bnoc/bnoc.py" -cnf "' + conf_directory + filename + '.json"')
 
                         if args["mode"] == "class":
