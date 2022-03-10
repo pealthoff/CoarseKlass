@@ -121,9 +121,6 @@ for target_vertices in range(100, 1000, 100):
                 noise_range = [float(args["noise"])]
             for noise_value in noise_range:
                 noise = float("{:.3f}".format(noise_value))
-            for i in range(1):
-                noise_value = 0.100
-                noise = float("{:.3f}".format(noise_value))
 
                 if args["dispersion"] is None:
                     dispersion_range = numpy.arange(0.10, 1, 0.1)
