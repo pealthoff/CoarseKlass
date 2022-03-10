@@ -62,8 +62,9 @@ def generate_conf(filename):
         "max_levels": max_levels,
         "max_size": [math.ceil(vertice * 0.2) for vertice in vertices],
         "reduction_factor": [
-            0.8
+            0.2
         ],
+        "upper_bound": None,
         "matching": "multi-label",
         "seed_priority": "random",
         "threshold": 0.4,
@@ -79,6 +80,7 @@ def generate_conf(filename):
         "particao_principal": True,
         "schema": schema,
         "until_convergence": False,
+        "output_text": True,
         "save_conf": False,
         "save_ncol": True,
         "save_type": True,
@@ -109,7 +111,7 @@ for target_vertices in range(100, 1000, 100):
         if args["communities"] is None:
             communities_range = range(4, 10)
         else:
-            communities_range = [float(args["communities"])]
+            communities_range = [int(args["communities"])]
         for num_communities in communities_range:
             communities = [num_communities] * layers
 
@@ -138,7 +140,7 @@ for target_vertices in range(100, 1000, 100):
                             generate_conf(filename)
 
                         if args["mode"] == "graph":
-                            os.system('python ' + coarsening_directory +'bnoc/bnoc/bnoc.py -cnf ' + conf_directory + filename + ".json")
+                            os.system('python "' + coarsening_directory +'bnoc/bnoc/bnoc.py" -cnf "' + conf_directory + filename + '.json"')
 
                         if args["mode"] == "class":
-                            os.system('python ' + coarsening_directory + 'cmk/exp.py -cnf ' + graphs_directory + filename + ".json")
+                            os.system('python "' + coarsening_directory + 'cmk/exp.py" -cnf "' + conf_directory + filename + '.json"')
