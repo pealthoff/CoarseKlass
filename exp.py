@@ -93,7 +93,6 @@ def exp():
     metrics_writer.header = ['Snippet', 'Amostragem', 'Reduction', 'Time [min]', 'Time [sec]', 'Accuracy']
 
     for amostragem in set([0.01, 0.1, 0.2, 0.5]):
-    # for amostragem in set([0.2]):
         sample_indices = numpy.random.choice(indices_with_label_true, size=math.ceil(len(indices) * amostragem),
                                              replace=False)
         for graph in coarsening.graph_hierarchy:
@@ -117,7 +116,6 @@ def exp():
     if options.show_timing:
         print()
         metrics_writer.print_tabular()
-        print()
     metrics_writer.save_csv(options.metrics_output + '-metrics.csv')
 
 
