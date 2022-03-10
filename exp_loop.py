@@ -13,6 +13,7 @@ ap.add_argument("-d", "--dispersion", required=False)
 ap.add_argument("-c", "--communities", required=False)
 ap.add_argument("-v", "--vertices", required=False)
 ap.add_argument("-dir", "--directory", required=False)
+ap.add_argument("-itr", "--iterations", required=False)
 
 args = vars(ap.parse_args())
 
@@ -132,7 +133,11 @@ for target_vertices in vertices_range:
                     dispersion_range = [float(args["dispersion"])]
                 for dispersion_value in dispersion_range:
                     dispersion = float("{:.3f}".format(dispersion_value))
-                    for itr in range(max_itr):
+                    if args["iterations"] is None:
+                        iterations_range = range(max_itr)
+                    else:
+                        iterations_range = range(int(args["vertices"]))
+                    for itr in iterations_range:
                         filename = "v_" + str(target_vertices) + "-s_" + id + "-c_" + str(num_communities) + "-n_" \
                                    + "{:.3f}".format(noise) + "-d" + "{:.3f}".format(dispersion) + "-itr_" + str(itr)
 
