@@ -14,7 +14,6 @@ ap.add_argument("-c", "--communities", required=False)
 ap.add_argument("-dir", "--directory", required=False)
 
 args = vars(ap.parse_args())
-print(args["mode"])
 
 if args["directory"] is None:
     coarsening_directory = "/home/paulo_althoff/development/coarsening/"
