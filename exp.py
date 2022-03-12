@@ -4,6 +4,9 @@ import os
 import inspect
 import json
 import math
+
+from sklearn.metrics import precision_recall_fscore_support
+
 from models.mlck import MultiLevelClassificationK
 from models.coarsening import Coarsening
 from models.solutionfinding import SolutionFinding
@@ -24,12 +27,16 @@ class NpEncoder(json.JSONEncoder):
             return super(NpEncoder, self).default(obj)
 
 
-def get_accuracy(graph, labels_true, labels_pred):
+def get_metrics(graph, labels_true, labels_pred):
     indices = graph.vs.select(type=0).indices
     indices_with_label_true = [i - 1 for i in indices if labels_true[i - 1] != -1]
     labels_pred = labels_pred[indices_with_label_true]
     labels_true = labels_true[indices_with_label_true]
-    return metrics.accuracy_score(labels_true, labels_pred)
+    accuracy = metrics.accuracy_score(labels_true, labels_pred)
+    precision_micro, recall_micro, fscore_micro, _ = precision_recall_fscore_support(labels_true, labels_pred, average='micro')
+    precision_macro, recall_macro, fscore_macro, _ = precision_recall_fscore_support(labels_true, labels_pred, average='macro')
+    return accuracy, precision_micro, precision_macro, recall_micro, recall_macro, fscore_micro, fscore_macro
+
 
 
 def main():
@@ -89,10 +96,12 @@ def exp():
         coarsening.run()
 
     for index, row in enumerate(metrics_writer.elapsed_set):
-        metrics_writer.elapsed_set[index] = ['--', '--'] + row + ['--']
-    metrics_writer.header = ['Snippet', 'Amostragem', 'Reduction', 'Time [min]', 'Time [sec]', 'Accuracy']
+        metrics_writer.elapsed_set[index] = ['--', '--'] + row + ['--', '--', '--', '--', '--', '--', '--']
+    metrics_writer.header = ['Snippet', 'Amostragem', 'Reduction', 'Time [min]', 'Time [sec]', 'Accuracy',
+                             'Precision (micro)', 'Precision (macro)', 'Recall (micro)', 'Recall (macro)',
+                             'F-score (micro)', 'F-score (macro)']
 
-    for amostragem in set([0.01, 0.1, 0.2, 0.5]):
+    for amostragem in {0.01, 0.1, 0.2, 0.5}:
         sample_indices = numpy.random.choice(indices_with_label_true, size=math.ceil(len(indices) * amostragem),
                                              replace=False)
         for graph in coarsening.graph_hierarchy:
@@ -109,9 +118,9 @@ def exp():
 
             labels_pred = numpy.array(sf.solution)
 
-            accuracy = get_accuracy(graph, labels_true, labels_pred)
+            accuracy, precision_micro, precision_macro, recall_micro, recall_macro, fscore_micro, fscore_macro = get_metrics(graph, labels_true, labels_pred)
 
-            metrics_writer.elapsed_set[timing_row] = ['%.2f' % amostragem, '%.2f' % reduction] + metrics_writer.elapsed_set[timing_row] + ['%.2f' % accuracy]
+            metrics_writer.elapsed_set[timing_row] = ['%.2f' % amostragem, '%.2f' % reduction] + metrics_writer.elapsed_set[timing_row] + ['%.2f' % accuracy, '%.2f' % precision_micro, '%.2f' % precision_macro, '%.2f' % recall_micro, '%.2f' % recall_macro, '%.2f' % fscore_micro, '%.2f' % fscore_macro]
 
     if options.show_timing:
         print()
