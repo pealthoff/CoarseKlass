@@ -125,7 +125,7 @@ def exp():
     if options.show_timing:
         print()
         metrics_writer.print_tabular()
-    metrics_writer.save_csv(options.metrics_output + '-metrics.csv')
+    metrics_writer.save_csv(options.metrics_output + '-metrics-complete.csv')
 
 
 if __name__ == "__main__":
