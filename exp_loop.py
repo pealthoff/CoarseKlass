@@ -4,6 +4,7 @@ import os
 
 import numpy
 import argparse
+import pandas
 
 ap = argparse.ArgumentParser()
 
@@ -96,6 +97,29 @@ def generate_conf(filename):
     with open(dict_file, "w") as f:
         json.dump(_dict, f, indent=4)
 
+df = pandas.DataFrame()
+
+def load_metrics(df, filename, vertices, noise, dispersion):
+    try:
+        df1 = pandas.read_csv(coarsening_directory + 'output/metrics/'+ filename +'-metrics-complete.csv')
+        df1 = df1.loc[df1['Amostragem'] != '--']
+        df1.insert(2, 'Vertices', [vertices] * len(df1), True)
+        df1.insert(2, 'Noise', [noise] * len(df1), True)
+        df1.insert(2, 'Dispersion', [dispersion] * (len(df1)), True)
+        cols = df1.columns.drop('Snippet')
+        df1[cols] = df1[cols].apply(pandas.to_numeric, errors='ignore')
+        for amostragem in [0.01, 0.1, 0.2, 0.5]:
+            df2 = df1.loc[df1['Amostragem'] == amostragem]
+            df2 = df2.drop(columns=['Precision (micro)', 'Precision (macro)', 'Recall (micro)', 'Recall (macro)'])
+            for metric in ['Accuracy', 'F-score (micro)', 'F-score (macro)']:
+                df2[metric + ' N'] = df2[metric] / df2.loc[df1['Reduction'] == 0].iloc[0][metric]
+            df = df.append(df2, ignore_index=True)
+
+
+        # df = df.append(df1, ignore_index=True)
+    except Exception:
+        print()
+    return df
 
 if args["vertices"] is None:
     vertices_range = range(100, 1000, 100)
@@ -151,3 +175,11 @@ for target_vertices in vertices_range:
 
                         if args["mode"] == "class":
                             os.system('python "' + coarsening_directory + 'cmk/exp.py" -cnf "' + conf_directory + filename + '.json"')
+
+                        if args["mode"] == "metrics":
+                            df = load_metrics(df, filename, total_vertices, noise, dispersion)
+
+if args["mode"] == "metrics":
+    df.to_csv(coarsening_directory + 'output/metrics/all-metrics-norm-complete.csv')
+
+    print("ok")
