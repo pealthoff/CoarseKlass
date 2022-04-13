@@ -206,7 +206,7 @@ for target_vertices in vertices_range:
                             df = load_metrics(df, filename, total_vertices, noise, dispersion, num_communities)
 
 if args["mode"] == "control":
-    df.to_csv(coarsening_directory + 'output/metrics/metrics-control.csv')
+    df_controle.to_csv(coarsening_directory + 'output/metrics/metrics-control.csv')
 if args["mode"] == "metrics":
     df.to_csv(coarsening_directory + 'output/metrics/all-metrics-norm-complete.csv')
 
