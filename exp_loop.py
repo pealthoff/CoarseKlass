@@ -116,7 +116,7 @@ def load_metrics(df, filename, vertices, noise, dispersion, num_communities):
             df2 = df2.drop(columns=['Accuracy', 'Precision (micro)', 'Precision (macro)', 'Recall (micro)', 'Recall (macro)'])
             for metric in ['Time class', 'F-score (micro)', 'F-score (macro)']:
                 df2[metric + ' N'] = df2[metric] / df2.loc[df1['Reduction'] == 0].iloc[0][metric]
-            df2['Time with coarsening N'] = (df2['Time class'] + coarsening_time) / df2.loc[df1['Reduction'] == 0].iloc[0][metric]
+            df2['Time with coarsening N'] = (df2['Time class'] + coarsening_time) / df2.loc[df1['Reduction'] == 0].iloc[0]['Time class']
             df = df.append(df2, ignore_index=True)
 
 
