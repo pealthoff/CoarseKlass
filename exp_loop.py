@@ -176,10 +176,16 @@ for target_vertices in vertices_range:
 
                         if args["mode"] == "graph":
                             print('python "' + coarsening_directory +'bnoc/bnoc/bnoc.py" -cnf "' + conf_directory + filename + '.json"')
-                            os.system('python "' + coarsening_directory +'bnoc/bnoc/bnoc.py" -cnf "' + conf_directory + filename + '.json"')
+                            if os.path.exists(graphs_directory + filename + '.ncol'):
+                                pass
+                            else:
+                                os.system('python "' + coarsening_directory +'bnoc/bnoc/bnoc.py" -cnf "' + conf_directory + filename + '.json"')
 
                         if args["mode"] == "class":
-                            os.system('python "' + coarsening_directory + 'cmk/exp.py" -cnf "' + conf_directory + filename + '.json"')
+                            if os.path.exists(coarsening_directory + 'output/metrics/'+ filename +'-metrics-complete.csv'):
+                                pass
+                            else:
+                                os.system('python "' + coarsening_directory + 'cmk/exp.py" -cnf "' + conf_directory + filename + '.json"')
 
                         if args["mode"] == "metrics":
                             df = load_metrics(df, filename, total_vertices, noise, dispersion, num_communities)
