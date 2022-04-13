@@ -99,6 +99,9 @@ def generate_conf(filename):
 
 df = pandas.DataFrame()
 
+df_controle = pandas.DataFrame(columns=['v', 'c', 'n', 'd', 'graph', 'metric'])
+
+
 def load_metrics(df, filename, vertices, noise, dispersion, num_communities):
     try:
         df1 = pandas.read_csv(coarsening_directory + 'output/metrics/'+ filename +'-metrics-complete.csv')
@@ -171,6 +174,18 @@ for target_vertices in vertices_range:
                                    + "{:.3f}".format(noise) + "-d" + "{:.3f}".format(dispersion) + "-itr_" + str(itr)
 
                         print(filename)
+                        if args["mode"] == "control":
+                            if os.path.exists(graphs_directory + filename + '.ncol'):
+                                graph = 1
+                            else:
+                                graph = 0
+                            if os.path.exists(coarsening_directory + 'output/metrics/'+ filename +'-metrics-complete.csv'):
+                                metric = 1
+                            else:
+                                metric = 0
+                            row = { 'v': total_vertices, 'c': num_communities, 'n': noise, 'd': dispersion, 'graph': graph, 'metric': metric }
+                            df_controle = df_controle.append(row, ignore_index=True)
+
                         if args["mode"] == "conf":
                             generate_conf(filename)
 
@@ -190,6 +205,8 @@ for target_vertices in vertices_range:
                         if args["mode"] == "metrics":
                             df = load_metrics(df, filename, total_vertices, noise, dispersion, num_communities)
 
+if args["mode"] == "control":
+    df.to_csv(coarsening_directory + 'output/metrics/metrics-control.csv')
 if args["mode"] == "metrics":
     df.to_csv(coarsening_directory + 'output/metrics/all-metrics-norm-complete.csv')
 
