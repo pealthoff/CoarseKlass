@@ -13,6 +13,7 @@ ap.add_argument("-n", "--noise", required=False)
 ap.add_argument("-d", "--dispersion", required=False)
 ap.add_argument("-c", "--communities", required=False)
 ap.add_argument("-v", "--vertices", required=False)
+ap.add_argument("-s", "--schema", required=False)
 ap.add_argument("-dir", "--directory", required=False)
 ap.add_argument("-itr", "--iterations", required=False)
 
@@ -154,7 +155,11 @@ if args["vertices"] is None:
 else:
     vertices_range = [int(args["vertices"])]
 for target_vertices in vertices_range:
-    for id in schemas:
+    if args["schema"] is None:
+        schemas_values = schemas
+    else:
+        schemas_values = [str(args["schema"])]
+    for id in schemas_values:
         layers = schemas[id]['layers']
         schema = schemas[id]['schema']
 
