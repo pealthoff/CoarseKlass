@@ -38,7 +38,24 @@ schemas = {
             [2, 3],
             [3, 1]
         ],
-    }
+    },
+    'h1': {
+        'layers': 5,
+        'schema': [
+            [0, 1],
+            [0, 2],
+            [1, 3],
+            [1, 4],
+            [3, 4]
+        ],
+    },
+    'b1': {
+        'layers': 2,
+        'schema': [
+            [0, 1],
+        ],
+    },
+
 }
 
 
@@ -102,7 +119,7 @@ df = pandas.DataFrame()
 df_controle = pandas.DataFrame(columns=['v', 'c', 'n', 'd', 'graph', 'metric'])
 
 
-def load_metrics(df, filename, vertices, noise, dispersion, num_communities):
+def load_metrics(df, filename, vertices, noise, dispersion, num_communities, schema_id):
     try:
         df1 = pandas.read_csv(coarsening_directory + 'output/metrics/'+ filename +'-metrics-complete.csv')
         coarsening_time = df1.loc[df1['Snippet'] == 'Coarsening'].iloc[0]['Time [min]'] * 60 + df1.loc[df1['Snippet'] == 'Coarsening'].iloc[0]['Time [sec]']
@@ -112,7 +129,8 @@ def load_metrics(df, filename, vertices, noise, dispersion, num_communities):
         df1.insert(2, 'Dispersion', [dispersion] * (len(df1)), True)
         df1['Time class'] = df1['Time [min]'] * 60 + df1['Time [sec]']
         df1['Communities'] = num_communities
-        cols = df1.columns.drop(['Snippet', 'Time [min]', 'Time [sec]'])
+        df1['Schema'] = schema_id
+        cols = df1.columns.drop(['Snippet', 'Time [min]', 'Time [sec]', 'Schema'])
         df1[cols] = df1[cols].apply(pandas.to_numeric, errors='ignore')
         for amostragem in [0.01, 0.1, 0.2, 0.5]:
             df2 = df1.loc[df1['Amostragem'] == amostragem]
@@ -205,7 +223,7 @@ for target_vertices in vertices_range:
                                 os.system('python "' + coarsening_directory + 'cmk/exp.py" -cnf "' + conf_directory + filename + '.json"')
 
                         if args["mode"] == "metrics":
-                            df = load_metrics(df, filename, total_vertices, noise, dispersion, num_communities)
+                            df = load_metrics(df, filename, total_vertices, noise, dispersion, num_communities, id)
 
 if args["mode"] == "control":
     df_controle.to_csv(coarsening_directory + 'output/metrics/metrics-control.csv')
