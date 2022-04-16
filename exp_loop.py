@@ -12,7 +12,10 @@ ap.add_argument("-m", "--mode", required=True)
 ap.add_argument("-n", "--noise", required=False)
 ap.add_argument("-d", "--dispersion", required=False)
 ap.add_argument("-c", "--communities", required=False)
+ap.add_argument("-mxcs", "--max_communities_step", required=False)
+ap.add_argument("-mxc", "--max_communities", required=False)
 ap.add_argument("-v", "--vertices", required=False)
+ap.add_argument("-mxv", "--max_vertices", required=False)
 ap.add_argument("-s", "--schema", required=False)
 ap.add_argument("-dir", "--directory", required=False)
 ap.add_argument("-itr", "--iterations", required=False)
@@ -150,8 +153,10 @@ def load_metrics(df, filename, vertices, noise, dispersion, num_communities, sch
     return df
 
 if args["vertices"] is None:
-    vertices_range = [*range(100, 1000, 100)]
-    vertices_range.append(1500)
+    if args["max_vertices"] is None:
+        vertices_range = [*range(100, 1000, 100)]
+    else:
+        vertices_range = [*range(100, int(args["max_vertices"]), 100)]
 else:
     vertices_range = [int(args["vertices"])]
 for target_vertices in vertices_range:
@@ -170,8 +175,16 @@ for target_vertices in vertices_range:
         max_levels = [100] * layers
         max_levels[0] = 0
 
+        if args["max_communities_step"] is None:
+            step_comm = 1
+        else:
+            int(args["max_communities_step"])
+
         if args["communities"] is None:
-            communities_range = range(4, 10)
+            if args["max_communities"] is None:
+                communities_range = range(4, 10)
+            else:
+                communities_range = [*range(4, int(args["max_communities"]), 1)]
         else:
             communities_range = [int(args["communities"])]
         for num_communities in communities_range:
@@ -235,4 +248,4 @@ if args["mode"] == "control":
 if args["mode"] == "metrics":
     df.to_csv(coarsening_directory + 'output/metrics/all-metrics-norm-complete.csv')
 
-    print("ok")
+print("ok")
