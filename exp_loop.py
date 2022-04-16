@@ -178,13 +178,13 @@ for target_vertices in vertices_range:
         if args["max_communities_step"] is None:
             step_comm = 1
         else:
-            int(args["max_communities_step"])
+            step_comm = int(args["max_communities_step"])
 
         if args["communities"] is None:
             if args["max_communities"] is None:
                 communities_range = range(4, 10)
             else:
-                communities_range = [*range(4, int(args["max_communities"]), 1)]
+                communities_range = [*range(4, int(args["max_communities"]), step_comm)]
         else:
             communities_range = [int(args["communities"])]
         for num_communities in communities_range:
