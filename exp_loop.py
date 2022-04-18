@@ -10,9 +10,12 @@ ap = argparse.ArgumentParser()
 
 ap.add_argument("-m", "--mode", required=True)
 ap.add_argument("-n", "--noise", required=False)
+ap.add_argument("-ds", "--dispersion_step", required=False)
+ap.add_argument("-mnd", "--min_dispersion", required=False)
+ap.add_argument("-mxd", "--max_dispersion", required=False)
 ap.add_argument("-d", "--dispersion", required=False)
 ap.add_argument("-c", "--communities", required=False)
-ap.add_argument("-mxcs", "--max_communities_step", required=False)
+ap.add_argument("-cs", "--communities_step", required=False)
 ap.add_argument("-mxc", "--max_communities", required=False)
 ap.add_argument("-v", "--vertices", required=False)
 ap.add_argument("-mxv", "--max_vertices", required=False)
@@ -175,10 +178,10 @@ for target_vertices in vertices_range:
         max_levels = [100] * layers
         max_levels[0] = 0
 
-        if args["max_communities_step"] is None:
+        if args["communities_step"] is None:
             step_comm = 1
         else:
-            step_comm = int(args["max_communities_step"])
+            step_comm = int(args["communities_step"])
 
         if args["communities"] is None:
             if args["max_communities"] is None:
@@ -197,8 +200,16 @@ for target_vertices in vertices_range:
             for noise_value in noise_range:
                 noise = float("{:.3f}".format(noise_value))
 
+                if args["dispersion_step"] is None:
+                    step_disp = 0.1
+                else:
+                    step_disp = float(args["dispersion_step"])
+
                 if args["dispersion"] is None:
-                    dispersion_range = numpy.arange(0.10, 1, 0.1)
+                    if args["max_dispersion"] is None or args["min_dispersion"] is None:
+                        dispersion_range = numpy.arange(0.10, 1, 0.1)
+                    else:
+                        dispersion_range = numpy.arange(float(args["min_dispersion"]), float(args["max_dispersion"]), step_disp)
                 else:
                     dispersion_range = [float(args["dispersion"])]
                 for dispersion_value in dispersion_range:
