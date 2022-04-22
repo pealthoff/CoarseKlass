@@ -23,6 +23,7 @@ see http://www.gnu.org/licenses/.
 
 Giving credit to the author by citing the papers.
 """
+import os
 
 import numpy
 
@@ -66,10 +67,12 @@ class MGraph(Graph):
         """
         filename_type: ncol, arff
         """
-
+        size = {}
         edges, weights = None, None
         if filetype == 'ncol':
             edges, weights = load_ncol(filename)
+            size['ncol'] = os.stat(filename).st_size
+
 
         if vertices:
             self.add_vertices(sum(vertices))
@@ -84,6 +87,7 @@ class MGraph(Graph):
             self.vs['type'] = types
             unique, vertices = numpy.unique(types, return_counts=True)
             self['layers'] = len(vertices)
+            size['types'] = os.stat(type_filename).st_size
         else:
             print('Please provide the number of vertices for each layer or a file with types.')
             exit()
@@ -108,6 +112,8 @@ class MGraph(Graph):
         # Not allow direct graphs
         if self.is_directed():
             self.to_undirected(combine_edges=True)
+
+        return size
 
     def number_of_components(self):
         components = self.components()

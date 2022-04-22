@@ -102,7 +102,7 @@ def main():
     with timing.timeit_context_add('Pre-processing'):
         # Setup parse options command line
         current_path = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-        parser = args.setup_parser(current_path + '/args/mlck.json')
+        parser = args.setup_parser(current_path + '/args/coarseklass.json')
         options = parser.parse_args()
         args.update_json(options)
         args.check_output(options)

@@ -14,7 +14,7 @@ from heapq import nlargest
 import functools
 import operator
 
-class MultiLevelClassificationK(MGraph):
+class CoarseKlass(MGraph):
 
     def __init__(self, *args, **kwargs):
         super().__init__()
@@ -122,7 +122,7 @@ class MultiLevelClassificationK(MGraph):
             reverse=self.reverse, seed_priority=self.seed_priority,
             max_prop_label=self.max_prop_label, until_convergence=self.until_convergence
         )
-        coarse = MultiLevelClassificationK(**kwargs)
+        coarse = CoarseKlass(**kwargs)
         coarse.add_vertices(uniqid)
         coarse.vs['type'] = types
         coarse.vs['weight'] = weights
@@ -166,9 +166,10 @@ class MultiLevelClassificationK(MGraph):
         self.calculate_neighborhood_from_guide()
 
     def load(self, filename, filetype='ncol', vertices=None, type_filename=None):
-        super(MultiLevelClassificationK, self).load(filename, filetype=filetype, vertices=vertices, type_filename=type_filename)
+        size = super(CoarseKlass, self).load(filename, filetype=filetype, vertices=vertices, type_filename=type_filename)
         self.validate()
         self.load_guides()
+        return size
 
     def validate(self):
 
