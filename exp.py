@@ -7,7 +7,6 @@ import math
 
 from sklearn.metrics import precision_recall_fscore_support
 
-from CoarseKlass.models.mlp import MultiLabelPropagation
 from models.coarseklass import CoarseKlass
 from models.coarsening import Coarsening
 from models.solutionfinding import SolutionFinding
