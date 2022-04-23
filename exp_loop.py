@@ -142,7 +142,7 @@ def load_metrics(df, filename, vertices, noise, dispersion, num_communities, sch
         for amostragem in [0.01, 0.1, 0.2, 0.5]:
             df2 = df1.loc[df1['Amostragem'] == amostragem]
             df2 = df2.drop(columns=['Accuracy'])
-            for metric in ['Time class', 'F-score (micro)', 'F-score (macro)', 'Precision (micro)', 'Precision (macro)', 'Recall (micro)', 'Recall (macro)']:
+            for metric in ['Time class', 'F-score (micro)', 'F-score (macro)', 'Precision (micro)', 'Precision (macro)', 'Recall (micro)', 'Recall (macro)', 'Vertices Size', 'Edges Size']:
                 df2[metric + ' N'] = df2[metric] / df2.loc[df1['Reduction'] == 0].iloc[0][metric]
                 df2[metric + ' 0 Red'] = df2.loc[df1['Reduction'] == 0].iloc[0][metric]
             df2['Time with coarsening N'] = (df2['Time class'] + coarsening_time) / df2.loc[df1['Reduction'] == 0].iloc[0]['Time class']
